@@ -8,6 +8,8 @@ into an API-first or cloud-oriented system.
 
 - FastAPI app factory in `app/main.py`
 - Local settings in `app/config.py`
+- Compose flow orchestration in `app/compose_service.py`
+- Local upload and image metadata helpers in `app/media_uploads.py`
 - SQLite persistence helpers and ORM models in `app/db/`
 - Platform registry in `app/platforms/registry.py`
 - Router entrypoint in `app/web/router.py`
@@ -19,6 +21,8 @@ into an API-first or cloud-oriented system.
 - Keep request handling server-rendered and HTML-first.
 - Use backend code to decide which platforms are visible, which validations run,
   and what is persisted locally.
+- Keep upload handling and media metadata extraction in backend modules instead
+  of pushing file logic into routes or templates.
 - Add domain or service modules only when later phases introduce real workflow
   complexity. Do not create empty package trees before they carry real logic.
 - Keep platform integrations behind clear backend boundaries instead of leaking
@@ -27,6 +31,8 @@ into an API-first or cloud-oriented system.
 ## Boundaries
 
 - Settings: load from `.env` and local defaults only
+- Compose flow: normalize form input, validate basic upload rules, and create
+  master posts plus media items locally
 - Persistence runtime: obtain synchronous SQLAlchemy sessions from `app/db/`
   and keep SQLite access backend-owned
 - Platform registry: expose configured-platform visibility and coarse capability

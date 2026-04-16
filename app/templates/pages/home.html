@@ -2,24 +2,25 @@
 
 {% block content %}
 <section class="page-intro">
-  <p class="section-eyebrow">Phase 4</p>
-  <h1>Database layer and migration foundation</h1>
+  <p class="section-eyebrow">Phase 5</p>
+  <h1>Compose flow and local upload intake</h1>
   <p>
-    The project now has a real local-only persistence baseline: centralized
-    settings, SQLAlchemy models, an Alembic migration layer, and placeholder
-    pages for the server-rendered workflow.
+    The project now has a real local-only creation workflow: centralized
+    settings, SQLAlchemy persistence, a multipart compose form, and local media
+    intake for ordered media items.
   </p>
 </section>
 
 <section class="card-grid">
   <article class="card">
-    <h2>Workflow shell</h2>
+    <h2>Workflow baseline</h2>
     <p>
-      The future flow is visible without pretending later phases already exist.
+      The workflow now starts with a real compose step and keeps later phases
+      honest about what is still deferred.
     </p>
     <ul class="feature-list">
-      <li><a href="{{ request.url_for('compose') }}">Compose</a> for the master post form shell</li>
-      <li><a href="{{ request.url_for('platforms') }}">Platforms</a> for configured platform visibility</li>
+      <li><a href="{{ request.url_for('compose') }}">Compose</a> now saves a master post with local media items</li>
+      <li><a href="{{ request.url_for('platforms') }}">Platforms</a> receives the saved post handoff for later selection work</li>
       <li><a href="{{ request.url_for('review_platforms') }}">Platform review</a> for future validation output</li>
       <li><a href="{{ request.url_for('review_final') }}">Final review</a> before safe submission</li>
       <li><a href="{{ request.url_for('results') }}">Results</a> for eventual post platform logs</li>
@@ -49,10 +50,24 @@
   </article>
 
   <article class="card">
+    <h2>Compose intake</h2>
+    <p>
+      Phase 5 accepts JPG, PNG, and WEBP image uploads, stores originals under
+      <code>storage/uploads/</code>, and records width, height, filename, and
+      display order for each media item.
+    </p>
+    <ul class="feature-list">
+      <li>Caption and hashtags remain optional master post fields</li>
+      <li>Upload order becomes durable display order</li>
+      <li>Failed submissions clean up partial files and rows</li>
+    </ul>
+  </article>
+
+  <article class="card">
     <h2>Platform registry</h2>
     <p>
-      Supported platforms live in backend code. The UI only exposes platforms
-      configured locally through <code>.env</code>.
+      Supported platforms still live in backend code. The UI only exposes
+      platforms configured locally through <code>.env</code>.
     </p>
     {% if configured_platforms %}
     <ul class="feature-list">
@@ -66,15 +81,6 @@
       to make a platform visible in the workflow.
     </p>
     {% endif %}
-  </article>
-
-  <article class="card">
-    <h2>Supported platform slugs</h2>
-    <ul class="feature-list">
-      {% for platform in supported_platforms %}
-      <li>{{ platform.display_name }} (<code>{{ platform.slug }}</code>)</li>
-      {% endfor %}
-    </ul>
   </article>
 </section>
 {% endblock %}

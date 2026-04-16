@@ -3,32 +3,98 @@
 {% block content %}
 <section class="page-intro">
   <p class="section-eyebrow">Compose</p>
-  <h1>Master post shell</h1>
+  <h1>Create a master post</h1>
   <p>
-    This page reserves the place where the user will draft a master post with a
-    caption, hashtags, and media items. The actual form and upload pipeline are
-    deferred to later phases.
+    Draft a local-only master post, attach one or more media items, and hand
+    the saved record off to the next server-rendered workflow step.
   </p>
 </section>
 
+{% if non_field_errors or field_errors %}
+<section class="alert error-alert" aria-labelledby="compose-errors-heading">
+  <h2 id="compose-errors-heading">Check the compose form</h2>
+  {% if non_field_errors %}
+  <ul class="error-list">
+    {% for error in non_field_errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if field_errors %}
+  <ul class="error-list">
+    {% for field_name, errors in field_errors.items() %}
+    {% for error in errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endif %}
+
 <section class="card-grid">
+  <article class="card form-card">
+    <h2>Compose locally</h2>
+    <form
+      class="compose-form"
+      method="post"
+      action="{{ request.url_for('compose') }}"
+      enctype="multipart/form-data"
+    >
+      <div class="form-field">
+        <label for="caption">Caption</label>
+        <textarea id="caption" name="caption" rows="7">{{ compose_form.caption }}</textarea>
+        <p class="field-help">Optional shared post copy for the master post.</p>
+      </div>
+
+      <div class="form-field">
+        <label for="hashtags">Hashtags</label>
+        <input id="hashtags" name="hashtags" type="text" value="{{ compose_form.hashtags }}">
+        <p class="field-help">Optional raw hashtag text stored with the master post.</p>
+      </div>
+
+      <div class="form-field">
+        <label for="media_files">Media items</label>
+        <input
+          id="media_files"
+          name="media_files"
+          type="file"
+          accept=".jpg,.jpeg,.png,.webp"
+          multiple
+          required
+        >
+        <p class="field-help">
+          Add 1 to {{ max_media_files }} images. Upload order becomes the saved
+          display order for future carousel support.
+        </p>
+        {% if field_errors.get("media_files") %}
+        <ul class="error-list">
+          {% for error in field_errors.get("media_files", []) %}
+          <li>{{ error }}</li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+
+      <button class="button-primary" type="submit">Save master post</button>
+    </form>
+  </article>
+
   <article class="card">
-    <h2>Planned inputs</h2>
+    <h2>Phase 5 upload rules</h2>
     <ul class="feature-list">
-      <li>Caption field for shared post copy</li>
-      <li>Hashtag entry for reusable metadata</li>
-      <li>Ordered media items for single media and carousel workflows</li>
+      <li>Supported image types: JPG, PNG, and WEBP</li>
+      <li>Files are saved locally under <code>storage/uploads/</code></li>
+      <li>Image width and height are captured for each media item</li>
+      <li>The next step redirects to <a href="{{ request.url_for('platforms') }}">platform selection</a></li>
     </ul>
   </article>
 
   <article class="card">
-    <h2>Deferred behavior</h2>
+    <h2>On validation failure</h2>
     <p>
-      No files are accepted here yet, and no master post is written to SQLite
-      during Phase 3.
-    </p>
-    <p>
-      The next visible step in the shell is <a href="{{ request.url_for('platforms') }}">platform selection</a>.
+      The server-rendered workflow keeps your caption and hashtags, but the
+      browser requires media files to be selected again before retrying.
     </p>
   </article>
 </section>

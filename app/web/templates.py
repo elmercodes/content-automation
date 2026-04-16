@@ -59,6 +59,7 @@ def render_page(
     page_title: str,
     active_page: str,
     workflow_step: str | None = None,
+    status_code: int = 200,
     **context: Any,
 ) -> HTMLResponse:
     return templates.TemplateResponse(
@@ -71,4 +72,5 @@ def render_page(
             workflow_step=workflow_step,
             **context,
         ),
+        status_code=status_code,
     )

@@ -10,6 +10,48 @@
   </p>
 </section>
 
+{% if post_summary %}
+<section class="card-grid">
+  <article class="card success-card">
+    <h2>Master post saved locally</h2>
+    <dl class="details compact-details">
+      <div>
+        <dt>Master post ID</dt>
+        <dd><code>{{ post_summary.id }}</code></dd>
+      </div>
+      <div>
+        <dt>Media items</dt>
+        <dd>{{ post_summary.media_count }}</dd>
+      </div>
+      <div>
+        <dt>Caption</dt>
+        <dd>
+          {% if post_summary.caption %}
+          {{ post_summary.caption }}
+          {% else %}
+          No caption saved yet
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Hashtags</dt>
+        <dd>
+          {% if post_summary.hashtags %}
+          {{ post_summary.hashtags }}
+          {% else %}
+          No hashtags saved yet
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+    <p class="muted">
+      Phase 6 will let this server-rendered workflow choose configured
+      platforms for the saved master post.
+    </p>
+  </article>
+</section>
+{% endif %}
+
 {% if configured_platforms %}
 <section class="card-grid">
   {% for platform in configured_platforms %}

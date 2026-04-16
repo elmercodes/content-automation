@@ -6,8 +6,11 @@ top-level directories without a clear reason.
 ## Current Layout
 
 - `app/` - application package
+- `app/compose_service.py` - compose flow orchestration and master post creation
 - `app/db/` - SQLAlchemy models, SQLite runtime helpers, and persistence
   metadata
+- `app/media_uploads.py` - local upload validation, file saves, metadata, and
+  cleanup helpers
 - `app/platforms/` - platform registry metadata and configured-platform helpers
 - `app/web/` - router entrypoint, route modules, and template helpers
 - `app/web/routes/` - server-rendered page handlers grouped by area
@@ -23,6 +26,8 @@ top-level directories without a clear reason.
 ## Placement Rules
 
 - Put request handlers and page flow code under `app/web/routes/`.
+- Keep compose orchestration and upload helpers in small top-level app modules
+  until the workflow grows enough to justify a deeper package split.
 - Keep persistence code under `app/db/`.
 - Keep platform registry code in `app/platforms/`.
 - Keep configuration and settings logic near `app/config.py` unless growth makes

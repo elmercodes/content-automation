@@ -54,8 +54,8 @@ def get_session_factory(settings: Settings | None = None) -> sessionmaker[Sessio
     return _build_session_factory(resolved_settings.database_url)
 
 
-def get_db_session(settings: Settings | None = None) -> Iterator[Session]:
-    session = get_session_factory(settings)()
+def get_db_session() -> Iterator[Session]:
+    session = get_session_factory()()
     try:
         yield session
     finally:

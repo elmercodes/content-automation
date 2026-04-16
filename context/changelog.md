@@ -4,6 +4,10 @@ Notable repository changes are listed here in a short human-readable form.
 
 ## 2026-04-16
 
+- Completed Phase 5 with a real compose form, local image upload intake,
+  ordered media item persistence, and handoff into the platforms page.
+- Added backend compose and upload helpers, server-rendered validation states,
+  and tests covering successful uploads plus cleanup on failed submissions.
 - Completed Phase 4 with the first SQLAlchemy models for master posts, ordered
   media items, and post platform logs.
 - Wired Alembic to the app metadata, added the first migration revision, and

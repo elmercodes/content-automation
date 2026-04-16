@@ -8,8 +8,9 @@ JavaScript application shell.
 
 - Shared layout in `app/templates/base.html`
 - Shared partials in `app/templates/partials/`
-- Workflow placeholder pages in `app/templates/pages/`
+- Workflow pages in `app/templates/pages/`
 - Static styling in `app/static/styles.css`
+- A real multipart compose form now lives on `pages/compose.html`
 
 ## Direction
 
@@ -26,12 +27,16 @@ JavaScript application shell.
 - Keep business logic out of templates.
 - Pass already-prepared page state from route handlers into the template.
 - Keep visual state understandable from rendered HTML alone.
+- When form validation fails, preserve text inputs and render explicit error
+  messages in HTML.
 
 ## No-JS Boundary
 
 - Do not introduce a JavaScript frontend framework.
 - Do not depend on client-side state to make page flow work.
 - Do not move validation or platform-selection rules into browser code.
+- Keep file-selection expectations honest: browsers will require media files to
+  be selected again after a validation failure.
 - Keep placeholder pages honest. If a phase is not implemented yet, say so in
   the rendered HTML instead of simulating fake behavior.
 

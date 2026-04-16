@@ -9,8 +9,8 @@ from app.main import app
 @pytest.mark.parametrize(
     ("path", "expected_text"),
     [
-        ("/", "Database layer and migration foundation"),
-        ("/compose", "Master post shell"),
+        ("/", "Compose flow and local upload intake"),
+        ("/compose", "Create a master post"),
         ("/platforms", "No platforms are configured locally"),
         ("/review/platforms", "Future platform-aware checks"),
         ("/review/final", "Submission checkpoint shell"),
@@ -18,7 +18,7 @@ from app.main import app
         ("/history", "Local history placeholder"),
     ],
 )
-async def test_phase_three_pages_render(path: str, expected_text: str) -> None:
+async def test_phase_five_pages_render(path: str, expected_text: str) -> None:
     get_settings.cache_clear()
     async with app.router.lifespan_context(app):
         transport = ASGITransport(app=app)

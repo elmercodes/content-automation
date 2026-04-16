@@ -10,6 +10,10 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   startup.
 - `app/config.py` owns the settings layer, `.env` loading, and repo-stable
   local path resolution.
+- `app/compose_service.py` orchestrates master post creation and attach-one-or-
+  more media item persistence for the compose flow.
+- `app/media_uploads.py` owns local upload validation, file saves, metadata
+  extraction, and cleanup on failed compose attempts.
 - `app/db/` owns the SQLite local database models, engine/session helpers, and
   persistence metadata.
 - `app/platforms/registry.py` is the backend-owned platform registry for
@@ -38,8 +42,8 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
 ## Intended Flow
 
 1. The browser submits a request to the FastAPI app.
-2. The backend loads settings, resolves configured platforms, validates input,
-   and coordinates domain logic.
+2. The backend loads settings, validates input, saves local uploads, and
+   coordinates workflow logic.
 3. Persistent data is stored in SQLite and media files remain on local disk.
 4. The backend renders the next HTML response or returns a simple status
    payload.
