@@ -12,6 +12,10 @@ JavaScript application shell.
 - Static styling in `app/static/styles.css`
 - A real multipart compose form now lives on `pages/compose.html`
 - A real configured-platform selection form now lives on `pages/platforms.html`
+- A real one-platform-at-a-time preview step now lives on
+  `pages/review_platforms.html`
+- The final review step now preserves selected-platform workflow context on
+  `pages/review_final.html`
 
 ## Direction
 
@@ -32,6 +36,10 @@ JavaScript application shell.
   messages in HTML.
 - Keep platform-selection state explicit in the URL handoff between steps rather
   than relying on hidden client-side state or JavaScript.
+- Keep preview navigation explicit in the URL with `post_id`, repeated
+  `platform_slug`, and a simple `platform_index` rather than client-side state.
+- Treat the preview UI as a practical local mock, not a pixel-perfect clone of
+  provider interfaces.
 
 ## No-JS Boundary
 
@@ -43,6 +51,9 @@ JavaScript application shell.
 - Keep safe empty states honest. If a workflow step is opened without the
   required `post_id` or selected platforms, render an explanatory HTML state
   instead of simulating fake progress.
+- Keep preview rendering backend-owned. Generated preview images should be
+  requested from a backend route, not by mounting the storage directory as a
+  public static tree.
 
 ## Related Docs
 

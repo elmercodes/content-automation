@@ -3,11 +3,11 @@
 {% block content %}
 <section class="page-intro">
   <p class="section-eyebrow">Platform review</p>
-  <h1>Future platform-aware checks</h1>
+  <h1>Preview selected platforms</h1>
   <p>
-    This page is still the placeholder shell for deeper validation, preview
-    generation, and media normalization. Phase 6 now carries the selected
-    platforms into this step so the next phase has a stable handoff.
+    Review one selected platform at a time with a locally generated preview,
+    deterministic image normalization, and simple text-length visibility from
+    the backend platform registry.
   </p>
 </section>
 
@@ -28,19 +28,116 @@
 </section>
 {% endif %}
 
-{% if review_post_summary %}
+{% if review_page and current_preview %}
 <section class="card-grid">
   <article class="card success-card">
-    <h2>Selected platforms received</h2>
+    <h2>Current platform</h2>
+    <p class="muted">
+      Platform {{ review_page.current_platform_index + 1 }} of
+      {{ review_page.total_platforms }}
+    </p>
     <dl class="details compact-details">
       <div>
-        <dt>Master post ID</dt>
-        <dd><code>{{ review_post_summary.id }}</code></dd>
+        <dt>Platform</dt>
+        <dd>{{ current_preview.platform.display_name }}</dd>
       </div>
       <div>
-        <dt>Media items</dt>
-        <dd>{{ review_post_summary.media_count }}</dd>
+        <dt>Master post ID</dt>
+        <dd><code>{{ review_page.post_id }}</code></dd>
       </div>
+      <div>
+        <dt>Preview canvas</dt>
+        <dd>
+          {{ current_preview.preview_spec.frame_label }}
+          · {{ current_preview.preview_spec.canvas_width }} ×
+          {{ current_preview.preview_spec.canvas_height }}
+          · {{ current_preview.preview_spec.aspect_ratio_label }}
+        </dd>
+      </div>
+      <div>
+        <dt>Current text length</dt>
+        <dd>{{ current_preview.text_metrics.character_count }} characters</dd>
+      </div>
+    </dl>
+    {% if platform_selection_url %}
+    <p class="muted">
+      Need to change the selected platforms? Return to
+      <a href="{{ platform_selection_url }}">platform selection</a>.
+    </p>
+    {% endif %}
+  </article>
+
+  <article class="card">
+    <h2>Selected platforms</h2>
+    <nav aria-label="Selected platform previews">
+      <ul class="platform-nav-list">
+        {% for nav_item in platform_navigation %}
+        <li>
+          <a
+            class="platform-nav-link{% if nav_item.current %} is-current{% endif %}"
+            href="{{ nav_item.url }}"
+          >
+            {{ nav_item.platform.display_name }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </nav>
+  </article>
+</section>
+
+<section class="card-grid preview-layout">
+  <article class="card preview-card">
+    <h2>{{ current_preview.platform.display_name }} preview</h2>
+    <p class="muted">
+      Original media is preserved under <code>storage/uploads/</code>. This
+      page shows a generated preview file with proportional resize and canvas
+      padding instead of default cropping.
+    </p>
+
+    {% if current_preview_image_url %}
+    <figure class="preview-frame">
+      <img
+        class="generated-preview-image"
+        src="{{ current_preview_image_url }}"
+        alt="{{ current_preview.platform.display_name }} preview for master post {{ review_page.post_id }}"
+        width="{{ current_preview.preview_spec.canvas_width }}"
+        height="{{ current_preview.preview_spec.canvas_height }}"
+      >
+    </figure>
+    {% else %}
+    <div class="empty-state inline-empty-state">
+      <h2>No preview image available</h2>
+      <p>
+        The current platform preview could not render an image. Review the
+        warning details on this page before continuing.
+      </p>
+    </div>
+    {% endif %}
+
+    {% if current_preview.primary_media_item %}
+    <dl class="details compact-details">
+      <div>
+        <dt>Previewed media item</dt>
+        <dd>
+          {{ current_preview.primary_media_item.label }}
+          {% if current_preview.primary_media_item.width and current_preview.primary_media_item.height %}
+          · {{ current_preview.primary_media_item.width }} ×
+          {{ current_preview.primary_media_item.height }}
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Registry notes</dt>
+        <dd>{{ current_preview.platform.validation_notes }}</dd>
+      </div>
+    </dl>
+    {% endif %}
+  </article>
+
+  <article class="card">
+    <h2>Posting text</h2>
+    <dl class="details compact-details">
       <div>
         <dt>Caption</dt>
         <dd>
@@ -61,39 +158,56 @@
           {% endif %}
         </dd>
       </div>
+      <div>
+        <dt>Combined text</dt>
+        <dd>
+          {% if current_preview.text_metrics.posting_text %}
+          <pre class="posting-text-preview">{{ current_preview.text_metrics.posting_text }}</pre>
+          {% else %}
+          <span class="muted">No caption or hashtags saved yet</span>
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Character count</dt>
+        <dd>
+          {{ current_preview.text_metrics.character_count }}
+          {% if current_preview.text_metrics.limit is not none %}
+          / {{ current_preview.text_metrics.limit }}
+          {% else %}
+          / unknown limit
+          {% endif %}
+        </dd>
+      </div>
+      {% if current_preview.text_metrics.limit is not none %}
+      <div>
+        <dt>Remaining characters</dt>
+        <dd>{{ current_preview.text_metrics.remaining_characters }}</dd>
+      </div>
+      {% endif %}
     </dl>
-    {% if platform_selection_url %}
-    <p class="muted">
-      Need to change the target set? Return to
-      <a href="{{ platform_selection_url }}">platform selection</a>.
-    </p>
-    {% endif %}
   </article>
 
   <article class="card">
-    <h2>Selected platforms</h2>
-    {% if selected_platforms %}
-    <ul class="feature-list">
-      {% for platform in selected_platforms %}
-      <li>
-        <strong>{{ platform.display_name }}</strong>
-        <span class="muted">
-          {% if platform.supports_carousel %}
-          supports up to {{ platform.max_carousel_items }} media items
-          {% else %}
-          single-media workflow only
-          {% endif %}
-        </span>
+    <h2>Warnings and notes</h2>
+    {% if current_preview.warnings %}
+    <ul class="warning-list">
+      {% for warning in current_preview.warnings %}
+      <li class="warning-item is-{{ warning.severity }}">
+        <strong>{{ warning.severity | capitalize }}</strong>
+        <span>{{ warning.message }}</span>
       </li>
       {% endfor %}
     </ul>
     {% else %}
     <p class="muted">
-      No valid selected platforms were carried into this review step yet.
+      No obvious preview warnings were detected for this selected platform.
     </p>
     {% endif %}
   </article>
+</section>
 
+<section class="card-grid">
   <article class="card">
     <h2>Ordered media items</h2>
     <ol class="media-summary-list">
@@ -110,27 +224,38 @@
       </li>
       {% endfor %}
     </ol>
+    {% if current_preview.additional_media_items %}
+    <p class="muted">
+      This Phase 7 review uses only the first media item visually. The
+      remaining ordered media items stay attached to the master post for Phase
+      8 carousel support.
+    </p>
+    {% endif %}
   </article>
+</section>
+
+<section class="button-row">
+  {% if previous_platform_url %}
+  <a class="button-secondary" href="{{ previous_platform_url }}">Previous platform</a>
+  {% endif %}
+
+  {% if next_platform_url %}
+  <a class="button-primary" href="{{ next_platform_url }}">Next platform</a>
+  {% endif %}
+
+  {% if review_final_url %}
+  <a class="button-primary" href="{{ review_final_url }}">Continue to final review</a>
+  {% endif %}
+</section>
+{% else %}
+<section class="empty-state">
+  <h2>Review selected platforms after the platforms step</h2>
+  <p>
+    This preview step needs one saved master post plus at least one selected
+    configured platform. Start with
+    <a href="{{ request.url_for('compose') }}">Compose</a>, then continue
+    through <a href="{{ request.url_for('platforms') }}">platform selection</a>.
+  </p>
 </section>
 {% endif %}
-
-<section class="card-grid">
-  <article class="card">
-    <h2>What will arrive later</h2>
-    <ul class="feature-list">
-      <li>Platform-specific validation messages</li>
-      <li>Preview references for selected platforms</li>
-      <li>Warnings for media items or caption rules that need adjustment</li>
-    </ul>
-  </article>
-
-  <article class="card">
-    <h2>Phase 7 boundary</h2>
-    <p>
-      No preview or normalization engine runs yet. This page now shows the
-      saved master post and selected platforms, but deeper platform-aware
-      checks still belong to the next phase.
-    </p>
-  </article>
-</section>
 {% endblock %}

@@ -52,6 +52,8 @@ first, then follow the topic links that match the task.
   - core data model direction
 - [`decisions/006_carousel_first_class_support.md`](decisions/006_carousel_first_class_support.md)
   - ordered carousel support as a first-class concept
+- [`decisions/007_preview_artifacts_are_regenerable_local_derivatives.md`](decisions/007_preview_artifacts_are_regenerable_local_derivatives.md)
+  - generated preview files as local regenerable derivatives
 
 ## Task Routing
 

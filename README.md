@@ -54,5 +54,6 @@ file lives at `storage/db/app.db` and should be created through Alembic:
 - Phase 4 database and migrations is complete.
 - Phase 5 compose form and upload pipeline is complete.
 - Phase 6 platform selection flow is complete.
-- Phase 7 preview engine and image normalization is now the current phase.
+- Phase 7 preview engine and image normalization is complete.
+- Phase 8 carousel support is now the current phase.
 - See `context/implementation.md` for the roadmap and current phase tracking.

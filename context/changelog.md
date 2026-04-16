@@ -4,6 +4,13 @@ Notable repository changes are listed here in a short human-readable form.
 
 ## 2026-04-16
 
+- Completed Phase 7 with deterministic image normalization, generated preview
+  files under local storage, and a real platform review step.
+- Added preview-state and generated-media backend modules, platform-owned
+  preview canvas metadata, and server-rendered one-platform-at-a-time review
+  navigation.
+- Added automated tests for preview generation, warning states, generated-media
+  routing, and the updated review workflow.
 - Completed Phase 6 with a real configured-platform selection step, lightweight
   eligibility guardrails, and a URL-based handoff into platform review.
 - Added backend platform-selection helpers, server-rendered selection and

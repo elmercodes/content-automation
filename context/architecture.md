@@ -16,14 +16,21 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   extraction, and cleanup on failed compose attempts.
 - `app/platform_selection_service.py` owns configured-platform resolution,
   lightweight eligibility checks, and the platform-review workflow handoff.
+- `app/preview_service.py` owns Phase 7 preview-state assembly, text-length
+  visibility, and warning generation for the review step.
+- `app/image_normalization.py` owns deterministic image normalization and
+  generated preview file creation under local storage.
 - `app/db/` owns the SQLite local database models, engine/session helpers, and
   persistence metadata.
 - `app/platforms/registry.py` is the backend-owned platform registry for
-  supported-platform metadata and configured-platform visibility.
+  supported-platform metadata, configured-platform visibility, and preview
+  canvas metadata.
 - `app/web/router.py` and `app/web/routes/` define the server-rendered route
   shell for home, compose, platform review, results, and history pages.
+- `app/web/routes/media.py` serves generated preview files through a narrow
+  backend-owned route instead of exposing the full `storage/` tree.
 - `app/templates/` now includes a shared base layout, workflow partials, and
-  placeholder pages for the future publishing flow.
+  real preview and final-review pages for the Phase 7 server-rendered workflow.
 - `alembic/` owns the migration layer and is wired to the SQLAlchemy metadata.
 
 ## Runtime Boundaries
@@ -37,19 +44,27 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   Alembic
 - Platform registry: supported-platform metadata and configured-platform
   visibility
+- Preview engine: selected-platform preview assembly plus deterministic local
+  warning state
+- Image normalization: proportional resize onto platform-owned canvases without
+  default cropping
 - Workflow handoff: `post_id` plus repeated `platform_slug` query params between
-  platform selection and platform review
+  platform selection, platform review, and final review
 - SQLite: durable app state
 - Local filesystem: uploads, generated media, and the SQLite file itself
+- Generated preview route: backend-owned file serving for preview artifacts
 - Platform adapters: deferred until later phases
 
 ## Intended Flow
 
 1. The browser submits a request to the FastAPI app.
 2. The backend loads settings, validates input, saves local uploads, resolves
-   configured platforms, and coordinates workflow logic.
-3. Persistent data is stored in SQLite and media files remain on local disk.
-4. The backend renders the next HTML response or redirects to the next
+   configured platforms, generates preview files when needed, and coordinates
+   workflow logic.
+3. Persistent data is stored in SQLite while uploaded originals and generated
+   preview files remain on local disk.
+4. The backend renders the next HTML response, serves generated preview media,
+   or redirects to the next
    server-rendered workflow step.
 
 ## Structural Rules

@@ -273,9 +273,11 @@ async def test_valid_platform_selection_redirects_to_review_step_in_registry_ord
     assert query["post_id"] == [str(post_id)]
     assert query["platform_slug"] == ["instagram", "x"]
     assert review_response.status_code == 200
-    assert "Selected platforms received" in review_response.text
+    assert "Preview selected platforms" in review_response.text
     assert "Instagram" in review_response.text
     assert "X" in review_response.text
+    assert "Current platform" in review_response.text
+    assert "Next platform" in review_response.text
 
 
 @pytest.mark.anyio

@@ -11,10 +11,14 @@ not an implementation spec for provider adapters yet.
 4. Determine which platforms are configured locally and currently eligible.
 5. Let the user choose from those configured platforms only.
 6. Hand the selected platforms into the platform review step.
-7. Validate the master post and media items against platform constraints.
-8. Submit to each selected platform through backend adapters in a controlled
+7. Generate platform-aware previews, normalize image media for review, and show
+   obvious warning states before submission exists.
+8. Carry the selected-platform handoff into the final review checkpoint.
+9. Validate the master post and media items against platform constraints before
+   submission.
+10. Submit to each selected platform through backend adapters in a controlled
    way.
-9. Record per-platform outcomes in post platform logs.
+11. Record per-platform outcomes in post platform logs.
 
 ## Phase 6 Baseline
 
@@ -27,6 +31,12 @@ not an implementation spec for provider adapters yet.
   saved master post and media items.
 - `POST /platforms` accepts one or more selected platforms and redirects to
   `/review/platforms?post_id=<id>&platform_slug=...`.
+- `GET /review/platforms` now generates a local preview for one selected
+  platform at a time, using the backend platform registry plus image
+  normalization to show a practical mock preview, text length visibility, and
+  obvious warning states.
+- `GET /review/final` now preserves the selected-platform handoff after preview
+  generation, but still stops before any provider adapter or submission logic.
 - Failed compose or platform-selection submissions return to the same
   server-rendered page with explicit HTML error messages and no partial local
   state retained.
@@ -43,7 +53,6 @@ not an implementation spec for provider adapters yet.
 - Durable platform selection persistence
 - Retry policy and submission concurrency policy
 - Final result and history page design
-- Preview generation and media normalization mechanics
 
 ## Related Docs
 

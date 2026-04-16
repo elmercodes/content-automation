@@ -1,9 +1,27 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from math import gcd
 from typing import Any
 
 from app.config import Settings
+
+
+@dataclass(frozen=True, slots=True)
+class PlatformPreviewSpec:
+    canvas_width: int
+    canvas_height: int
+    frame_label: str
+    background_hex: str = "#F6F2EA"
+
+    @property
+    def canvas_size(self) -> tuple[int, int]:
+        return (self.canvas_width, self.canvas_height)
+
+    @property
+    def aspect_ratio_label(self) -> str:
+        divisor = gcd(self.canvas_width, self.canvas_height)
+        return f"{self.canvas_width // divisor}:{self.canvas_height // divisor}"
 
 
 @dataclass(frozen=True, slots=True)
@@ -14,6 +32,7 @@ class PlatformDefinition:
     supports_carousel: bool
     max_carousel_items: int
     allowed_media_types: tuple[str, ...]
+    preview_spec: PlatformPreviewSpec
     caption_limit: int | None = None
     validation_notes: str = ""
 
@@ -36,8 +55,13 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
         supports_carousel=True,
         max_carousel_items=10,
         allowed_media_types=("image", "video"),
+        preview_spec=PlatformPreviewSpec(
+            canvas_width=1080,
+            canvas_height=1350,
+            frame_label="4:5 feed preview",
+        ),
         caption_limit=2200,
-        validation_notes="Phase 3 visibility is based on a local access token only.",
+        validation_notes="Configured visibility is based on a local access token.",
     ),
     PlatformDefinition(
         slug="facebook",
@@ -46,8 +70,13 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
         supports_carousel=False,
         max_carousel_items=1,
         allowed_media_types=("image", "video"),
+        preview_spec=PlatformPreviewSpec(
+            canvas_width=1200,
+            canvas_height=1200,
+            frame_label="Square feed preview",
+        ),
         validation_notes=(
-            "Phase 3 uses page ID presence as a lightweight visibility check."
+            "Configured visibility uses page ID presence as a lightweight check."
         ),
     ),
     PlatformDefinition(
@@ -57,8 +86,13 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
         supports_carousel=True,
         max_carousel_items=4,
         allowed_media_types=("image", "video"),
+        preview_spec=PlatformPreviewSpec(
+            canvas_width=1600,
+            canvas_height=900,
+            frame_label="Wide timeline preview",
+        ),
         caption_limit=280,
-        validation_notes="Phase 3 visibility is based on an API key placeholder only.",
+        validation_notes="Configured visibility is based on a local API key.",
     ),
 )
 
@@ -96,6 +130,13 @@ def serialize_platform(
         "supports_carousel": platform.supports_carousel,
         "max_carousel_items": platform.max_carousel_items,
         "allowed_media_types": platform.allowed_media_types,
+        "preview_spec": {
+            "canvas_width": platform.preview_spec.canvas_width,
+            "canvas_height": platform.preview_spec.canvas_height,
+            "frame_label": platform.preview_spec.frame_label,
+            "background_hex": platform.preview_spec.background_hex,
+            "aspect_ratio_label": platform.preview_spec.aspect_ratio_label,
+        },
         "caption_limit": platform.caption_limit,
         "validation_notes": platform.validation_notes,
     }

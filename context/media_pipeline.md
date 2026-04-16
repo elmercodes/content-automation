@@ -10,6 +10,8 @@ the actual files live under `storage/`.
 - Storage directories are created during app startup if missing.
 - Phase 5 stores compose uploads under `storage/uploads/posts/<post_id>/`.
 - Phase 5 currently accepts image uploads only: JPG, PNG, and WEBP.
+- Phase 7 stores generated preview files under
+  `storage/generated/previews/v1/posts/<post_id>/<platform_slug>/media-<display_order>.png`.
 
 ## Direction
 
@@ -17,6 +19,8 @@ the actual files live under `storage/`.
 - Keep file handling local-first with no remote object storage.
 - Preserve explicit order for multi-image carousel posts.
 - Separate uploaded originals from generated derivatives or normalized outputs.
+- Preserve the uploaded original by default. Preview generation should create a
+  derived file instead of mutating the original asset.
 
 ## Lifecycle Stages
 
@@ -24,9 +28,12 @@ the actual files live under `storage/`.
 2. The app saves the original file locally with a unique stored filename.
 3. The app records media metadata including original filename, width, height,
    relative file path, and display order.
-4. Later phases may create generated or normalized variants under
-   `storage/generated/`.
-5. Posting workflows use the ordered media item set attached to the master post.
+4. Phase 7 can create generated preview variants under `storage/generated/`
+   without changing the saved upload.
+5. Preview normalization resizes proportionally, centers the image on a new
+   platform-owned canvas, and avoids default cropping.
+6. Later posting workflows use the ordered media item set attached to the
+   master post.
 
 ## Phase 5 Upload Rules
 
@@ -37,6 +44,16 @@ the actual files live under `storage/`.
   posts or media items.
 - Video intake is deferred until later phases add metadata extraction and
   preview support for that media type.
+
+## Phase 7 Preview Rules
+
+- Preview generation is deterministic and regenerable.
+- Generated preview files are local artifacts, not durable primary records.
+- Phase 7 is single-image-first: when multiple media items exist, the preview
+  step renders only the first media item visually and keeps the rest visible as
+  ordered metadata until Phase 8.
+- The default background strategy is a neutral solid canvas fill rather than
+  image-aware gradients or automatic cropping.
 
 ## Validation Boundaries
 

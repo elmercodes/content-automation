@@ -1,7 +1,7 @@
 # Implementation Tracker
 
 Status legend: Not Started | In Progress | Completed
-Current phase: Phase 7 - Preview engine and image normalization
+Current phase: Phase 8 - Carousel support
 
 | Phase | Status | Summary |
 | --- | --- | --- |
@@ -11,8 +11,8 @@ Current phase: Phase 7 - Preview engine and image normalization
 | 4. Database and migrations | Completed | Implemented SQLite models, runtime session setup, and the first Alembic migration |
 | 5. Compose form and upload pipeline | Completed | Built the server-rendered compose form, local upload pipeline, and master post creation flow |
 | 6. Platform selection flow | Completed | Show only configured platforms and capture user choices |
-| 7. Preview engine and image normalization | In Progress | Generate platform-aware previews and normalize media |
-| 8. Carousel support | Not Started | Support ordered multi-image posts and validations |
+| 7. Preview engine and image normalization | Completed | Generate platform-aware previews and normalize media |
+| 8. Carousel support | In Progress | Support ordered multi-image posts and validations |
 | 9. Platform adapters and posting | Not Started | Implement provider posting integrations and safe submission |
 | 10. Results and post history | Not Started | Record outcomes and expose local history views |
 | 11. Testing, polish, and shareability | Not Started | Improve coverage, docs, packaging, and local usability |
@@ -43,3 +43,7 @@ Current phase: Phase 7 - Preview engine and image normalization
 - 2026-04-16: Phase 6 completed with a real configured-platform selection form,
   lightweight eligibility guardrails, and a URL-based handoff into platform
   review. Phase 7 is now in progress.
+- 2026-04-16: Phase 7 completed with registry-owned preview canvas metadata, a
+  deterministic image normalization layer, generated preview files under local
+  storage, and a real one-platform-at-a-time review step. Phase 8 is now in
+  progress.

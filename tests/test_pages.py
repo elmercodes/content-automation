@@ -12,13 +12,13 @@ from app.main import app
         ("/", "Platform selection and workflow handoff"),
         ("/compose", "Create a master post"),
         ("/platforms", "Save a master post before choosing platforms"),
-        ("/review/platforms", "Future platform-aware checks"),
-        ("/review/final", "Submission checkpoint shell"),
+        ("/review/platforms", "Preview selected platforms"),
+        ("/review/final", "Submission checkpoint"),
         ("/results", "Post platform log placeholder"),
         ("/history", "Local history placeholder"),
     ],
 )
-async def test_phase_six_pages_render(path: str, expected_text: str) -> None:
+async def test_workflow_pages_render(path: str, expected_text: str) -> None:
     get_settings.cache_clear()
     async with app.router.lifespan_context(app):
         transport = ASGITransport(app=app)

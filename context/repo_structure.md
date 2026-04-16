@@ -9,13 +9,18 @@ top-level directories without a clear reason.
 - `app/compose_service.py` - compose flow orchestration and master post creation
 - `app/db/` - SQLAlchemy models, SQLite runtime helpers, and persistence
   metadata
+- `app/image_normalization.py` - deterministic image normalization and preview
+  file generation
 - `app/media_uploads.py` - local upload validation, file saves, metadata, and
   cleanup helpers
 - `app/platform_selection_service.py` - configured-platform resolution,
   lightweight workflow eligibility, and handoff helpers
+- `app/preview_service.py` - preview-state assembly and warning generation for
+  the review step
 - `app/platforms/` - platform registry metadata and configured-platform helpers
 - `app/web/` - router entrypoint, route modules, and template helpers
 - `app/web/routes/` - server-rendered page handlers grouped by area
+- `app/web/routes/media.py` - backend-owned generated-preview file serving
 - `app/templates/` - Jinja2 templates
 - `app/templates/partials/` - shared template fragments
 - `app/static/` - CSS and other static assets
@@ -30,8 +35,8 @@ top-level directories without a clear reason.
 - Put request handlers and page flow code under `app/web/routes/`.
 - Keep compose orchestration and upload helpers in small top-level app modules
   until the workflow grows enough to justify a deeper package split.
-- Keep platform-selection orchestration in a small top-level app module until
-  preview and posting phases justify a broader workflow package.
+- Keep platform-selection, preview, and normalization orchestration in small
+  top-level app modules until later phases justify a broader workflow package.
 - Keep persistence code under `app/db/`.
 - Keep platform registry code in `app/platforms/`.
 - Keep configuration and settings logic near `app/config.py` unless growth makes
@@ -47,6 +52,8 @@ top-level directories without a clear reason.
 
 - `storage/uploads/` is for user-provided media.
 - `storage/generated/` is for local derivatives, previews, or normalized assets.
+- `storage/generated/previews/v1/` is the current generated preview namespace
+  for Phase 7 artifacts.
 - `storage/db/` is for the local SQLite database file.
 - Runtime data under `storage/` stays out of version control except for
   placeholder `.gitkeep` files.

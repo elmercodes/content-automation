@@ -3,29 +3,117 @@
 {% block content %}
 <section class="page-intro">
   <p class="section-eyebrow">Final review</p>
-  <h1>Submission checkpoint shell</h1>
+  <h1>Submission checkpoint</h1>
   <p>
-    This page will become the last server-rendered checkpoint before the app
-    calls platform adapters.
+    The preview engine has generated review output for the selected platforms.
+    This phase still stops before posting adapters, but the workflow handoff is
+    now preserved into the final server-rendered checkpoint.
   </p>
+</section>
+
+{% if final_review_errors %}
+<section class="alert error-alert" aria-labelledby="review-final-errors-heading">
+  <h2 id="review-final-errors-heading">Check the workflow handoff</h2>
+  <ul class="error-list">
+    {% for error in final_review_errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% if platform_selection_url %}
+  <p>
+    Return to <a href="{{ platform_selection_url }}">platform selection</a> to
+    choose eligible configured platforms again.
+  </p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if review_post_summary %}
+<section class="card-grid">
+  <article class="card success-card">
+    <h2>Master post ready for later phases</h2>
+    <dl class="details compact-details">
+      <div>
+        <dt>Master post ID</dt>
+        <dd><code>{{ review_post_summary.id }}</code></dd>
+      </div>
+      <div>
+        <dt>Media items</dt>
+        <dd>{{ review_post_summary.media_count }}</dd>
+      </div>
+      <div>
+        <dt>Caption</dt>
+        <dd>
+          {% if review_post_summary.caption %}
+          {{ review_post_summary.caption }}
+          {% else %}
+          No caption saved yet
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Hashtags</dt>
+        <dd>
+          {% if review_post_summary.hashtags %}
+          {{ review_post_summary.hashtags }}
+          {% else %}
+          No hashtags saved yet
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+  </article>
+
+  <article class="card">
+    <h2>Selected platforms</h2>
+    <ul class="feature-list">
+      {% for item in selected_platform_summaries %}
+      <li>
+        <strong>{{ item.platform.display_name }}</strong>
+        <span class="muted">
+          {{ item.text_metrics.character_count }} characters
+          {% if item.text_metrics.limit is not none %}
+          / {{ item.text_metrics.limit }}
+          {% else %}
+          / unknown limit
+          {% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+  </article>
 </section>
 
 <section class="card-grid">
   <article class="card">
-    <h2>Future responsibilities</h2>
-    <ul class="feature-list">
-      <li>Show the final master post summary</li>
-      <li>List the selected platforms and ordered media items</li>
-      <li>Surface final warnings before safe submission</li>
-    </ul>
+    <h2>Phase 7 completion point</h2>
+    <p>
+      Generated preview files now exist locally under
+      <code>storage/generated/</code>. Posting adapters, post platform logs, and
+      submission controls remain deferred to later phases.
+    </p>
   </article>
 
   <article class="card">
-    <h2>Deferred for later phases</h2>
-    <p>
-      No submission button exists yet because provider adapters, persistence,
-      and validation are intentionally deferred.
-    </p>
+    <h2>Review navigation</h2>
+    <div class="button-row compact-button-row">
+      {% if review_platform_url %}
+      <a class="button-secondary" href="{{ review_platform_url }}">Back to previews</a>
+      {% endif %}
+      {% if platform_selection_url %}
+      <a class="button-secondary" href="{{ platform_selection_url }}">Back to platform selection</a>
+      {% endif %}
+    </div>
   </article>
 </section>
+{% else %}
+<section class="empty-state">
+  <h2>Reach this step through the preview workflow</h2>
+  <p>
+    This checkpoint appears after platform review. Use
+    <a href="{{ request.url_for('compose') }}">Compose</a> and
+    <a href="{{ request.url_for('platforms') }}">platform selection</a> first.
+  </p>
+</section>
+{% endif %}
 {% endblock %}
