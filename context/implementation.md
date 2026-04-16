@@ -1,13 +1,13 @@
 # Implementation Tracker
 
 Status legend: Not Started | In Progress | Completed
-Current phase: Phase 2 - AI-agent docs system
+Current phase: Phase 3 - Core app skeleton and config
 
 | Phase | Status | Summary |
 | --- | --- | --- |
 | 1. Foundation and environment | Completed | Repo bootstrap, tooling, local run flow, minimal docs, localhost smoke app |
-| 2. AI-agent docs system | In Progress | Expand context docs for product, architecture, workflow, and maintenance |
-| 3. Core app skeleton and config | Not Started | Build the real app shell, settings layer, and page flow foundation |
+| 2. AI-agent docs system | Completed | Expanded context docs, ADRs, navigation, and agent maintenance guidance |
+| 3. Core app skeleton and config | In Progress | Build the real app shell, settings layer, and page flow foundation |
 | 4. Database and migrations | Not Started | Implement SQLite models and first Alembic migration |
 | 5. Compose form and upload pipeline | Not Started | Build post composition and local media intake |
 | 6. Platform selection flow | Not Started | Show only configured platforms and capture user choices |
@@ -26,4 +26,8 @@ Current phase: Phase 2 - AI-agent docs system
 
 ## Notes
 
-- 2026-04-15: Phase 1 completed with repo bootstrap, FastAPI/Jinja2 smoke app, Alembic scaffold, local storage layout, tooling, tests, and initial AI-agent docs.
+- 2026-04-15: Phase 1 completed with repo bootstrap, FastAPI/Jinja2 smoke app,
+  Alembic scaffold, local storage layout, tooling, tests, and initial AI-agent
+  docs.
+- 2026-04-15: Phase 2 completed with expanded topic docs, ADRs, context
+  navigation, terminology guidance, and updated agent instructions.

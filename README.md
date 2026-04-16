@@ -1,6 +1,9 @@
 # Local-First Social Publisher
 
-This repository contains a local-first social media publishing application built with Python, FastAPI, and server-rendered HTML templates. Phase 1 establishes the development foundation only: local bootstrap, tooling, documentation backbone, and a minimal localhost smoke app.
+This repository contains a local-first social media publishing application built
+with Python, FastAPI, and server-rendered HTML templates. Phase 1 established
+the development foundation: local bootstrap, tooling, documentation backbone,
+and a minimal localhost smoke app.
 
 ## Requirements
 
@@ -36,5 +39,6 @@ pytest
 ## Current Status
 
 - Phase 1 foundation is complete.
-- Phase 2 AI-agent docs expansion is the current phase.
+- Phase 2 AI-agent docs system is complete.
+- Phase 3 core app skeleton and config is now the current phase.
 - See `context/implementation.md` for the roadmap and current phase tracking.
