@@ -2,12 +2,13 @@
 
 {% block content %}
 <section class="page-intro">
-  <p class="section-eyebrow">Phase 5</p>
-  <h1>Compose flow and local upload intake</h1>
+  <p class="section-eyebrow">Phase 6</p>
+  <h1>Platform selection and workflow handoff</h1>
   <p>
     The project now has a real local-only creation workflow: centralized
-    settings, SQLAlchemy persistence, a multipart compose form, and local media
-    intake for ordered media items.
+    settings, SQLAlchemy persistence, a multipart compose form, local media
+    intake for ordered media items, and configured-platform selection before
+    review.
   </p>
 </section>
 
@@ -20,8 +21,8 @@
     </p>
     <ul class="feature-list">
       <li><a href="{{ request.url_for('compose') }}">Compose</a> now saves a master post with local media items</li>
-      <li><a href="{{ request.url_for('platforms') }}">Platforms</a> receives the saved post handoff for later selection work</li>
-      <li><a href="{{ request.url_for('review_platforms') }}">Platform review</a> for future validation output</li>
+      <li><a href="{{ request.url_for('platforms') }}">Platforms</a> now shows configured platforms and captures selected platforms</li>
+      <li><a href="{{ request.url_for('review_platforms') }}">Platform review</a> now receives the workflow handoff for future validation output</li>
       <li><a href="{{ request.url_for('review_final') }}">Final review</a> before safe submission</li>
       <li><a href="{{ request.url_for('results') }}">Results</a> for eventual post platform logs</li>
     </ul>
@@ -64,15 +65,15 @@
   </article>
 
   <article class="card">
-    <h2>Platform registry</h2>
+    <h2>Platform selection flow</h2>
     <p>
-      Supported platforms still live in backend code. The UI only exposes
-      platforms configured locally through <code>.env</code>.
+      Phase 6 uses the backend platform registry to show only configured
+      platforms and block obviously incompatible selections before review.
     </p>
     {% if configured_platforms %}
     <ul class="feature-list">
       {% for platform in configured_platforms %}
-      <li>{{ platform.display_name }} is configured</li>
+      <li>{{ platform.display_name }} is configured locally</li>
       {% endfor %}
     </ul>
     {% else %}

@@ -3,12 +3,35 @@
 {% block content %}
 <section class="page-intro">
   <p class="section-eyebrow">Platforms</p>
-  <h1>Configured platform visibility</h1>
+  <h1>Select configured platforms</h1>
   <p>
-    The platform registry is now the single source of truth for which platforms
-    exist in code and which ones are visible from local settings.
+    Choose one or more configured platforms for the current master post. This
+    step stays server-rendered, uses the backend platform registry as the
+    source of truth, and hands the workflow into platform review.
   </p>
 </section>
+
+{% if non_field_errors or field_errors %}
+<section class="alert error-alert" aria-labelledby="platform-selection-errors-heading">
+  <h2 id="platform-selection-errors-heading">Check the platform selection</h2>
+  {% if non_field_errors %}
+  <ul class="error-list">
+    {% for error in non_field_errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+  </ul>
+  {% endif %}
+  {% if field_errors %}
+  <ul class="error-list">
+    {% for errors in field_errors.values() %}
+    {% for error in errors %}
+    <li>{{ error }}</li>
+    {% endfor %}
+    {% endfor %}
+  </ul>
+  {% endif %}
+</section>
+{% endif %}
 
 {% if post_summary %}
 <section class="card-grid">
@@ -44,13 +67,139 @@
         </dd>
       </div>
     </dl>
-    <p class="muted">
-      Phase 6 will let this server-rendered workflow choose configured
-      platforms for the saved master post.
-    </p>
+  </article>
+
+  <article class="card">
+    <h2>Ordered media items</h2>
+    <ol class="media-summary-list">
+      {% for media_item in post_summary.media_items %}
+      <li>
+        <strong>{{ media_item.display_order + 1 }}.</strong>
+        {{ media_item.label }}
+        <span class="muted">
+          {{ media_item.media_type }}
+          {% if media_item.width and media_item.height %}
+          · {{ media_item.width }} × {{ media_item.height }}
+          {% endif %}
+        </span>
+      </li>
+      {% endfor %}
+    </ol>
   </article>
 </section>
+
+{% if not platform_selection_state.has_configured_platforms %}
+<section class="empty-state">
+  <h2>No platforms are configured locally</h2>
+  <p>
+    Add local credential values in <code>.env</code> using the names documented
+    in <code>.env.example</code>. The platform selection flow only exposes
+    configured platforms from the backend platform registry.
+  </p>
+</section>
+{% else %}
+  {% if platform_selection_state.has_eligible_platforms %}
+  <section class="card-grid">
+    <article class="card form-card">
+      <h2>Choose configured platforms</h2>
+      <form class="platform-selection-form" method="post" action="{{ request.url_for('platforms') }}">
+        <input type="hidden" name="post_id" value="{{ post_summary.id }}">
+
+        <fieldset class="platform-fieldset">
+          <legend>Selected platforms</legend>
+          <p class="field-help">
+            Only configured platforms that pass this step's lightweight
+            eligibility guardrails can move into platform review.
+          </p>
+
+          <div class="platform-choice-list">
+            {% for platform in eligible_platforms %}
+            <label class="platform-choice-card" for="platform-{{ platform.slug }}">
+              <span class="platform-choice-control">
+                <input
+                  id="platform-{{ platform.slug }}"
+                  name="platform_slug"
+                  type="checkbox"
+                  value="{{ platform.slug }}"
+                  {% if platform.slug in platform_selection_form.selected_platform_slugs %}checked{% endif %}
+                >
+              </span>
+              <span class="platform-choice-copy">
+                <strong>{{ platform.display_name }}</strong>
+                <span class="muted">
+                  {{ platform.allowed_media_types | join(", ") }}
+                  {% if platform.caption_limit %}
+                  · up to {{ platform.caption_limit }} characters
+                  {% endif %}
+                </span>
+                <span class="muted">
+                  {% if platform.supports_carousel %}
+                  Supports up to {{ platform.max_carousel_items }} media items
+                  {% else %}
+                  Single-media workflow only
+                  {% endif %}
+                </span>
+                <span class="muted">{{ platform.validation_notes }}</span>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+
+          {% if field_errors.get("platform_slug") %}
+          <ul class="error-list">
+            {% for error in field_errors.get("platform_slug", []) %}
+            <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </fieldset>
+
+        <button class="button-primary" type="submit">Continue to platform review</button>
+      </form>
+    </article>
+  </section>
+  {% else %}
+  <section class="empty-state">
+    <h2>No configured platforms are eligible yet</h2>
+    <p>
+      The current master post is saved locally, but every configured platform is
+      blocked by a lightweight workflow guardrail. Adjust the master post in a
+      future phase or choose a different configured platform once available.
+    </p>
+  </section>
+  {% endif %}
+
+  {% if ineligible_platforms %}
+  <section class="card-grid">
+    {% for platform in ineligible_platforms %}
+    <article class="card">
+      <h2>{{ platform.display_name }}</h2>
+      <p class="muted">{{ platform.ineligibility_reason }}</p>
+      <dl class="details compact-details">
+        <div>
+          <dt>Allowed media types</dt>
+          <dd>{{ platform.allowed_media_types | join(", ") }}</dd>
+        </div>
+        <div>
+          <dt>Current limit</dt>
+          <dd>Up to {{ platform.max_carousel_items }} media items in this workflow</dd>
+        </div>
+      </dl>
+    </article>
+    {% endfor %}
+  </section>
+  {% endif %}
 {% endif %}
+{% else %}
+<section class="empty-state">
+  <h2>Save a master post before choosing platforms</h2>
+  <p>
+    This step comes after the compose flow. Start with
+    <a href="{{ request.url_for('compose') }}">Compose</a> so the backend can
+    load one master post and its ordered media items into the platform
+    selection flow.
+  </p>
+</section>
 
 {% if configured_platforms %}
 <section class="card-grid">
@@ -63,28 +212,12 @@
         <dd><code>{{ platform.slug }}</code></dd>
       </div>
       <div>
-        <dt>Carousel</dt>
-        <dd>
-          {% if platform.supports_carousel %}
-          Supported up to {{ platform.max_carousel_items }} items
-          {% else %}
-          Not yet marked for carousel
-          {% endif %}
-        </dd>
-      </div>
-      <div>
         <dt>Media types</dt>
         <dd>{{ platform.allowed_media_types | join(", ") }}</dd>
       </div>
       <div>
-        <dt>Caption rule</dt>
-        <dd>
-          {% if platform.caption_limit %}
-          Up to {{ platform.caption_limit }} characters
-          {% else %}
-          Deferred to later validation work
-          {% endif %}
-        </dd>
+        <dt>Current limit</dt>
+        <dd>Up to {{ platform.max_carousel_items }} media items</dd>
       </div>
     </dl>
     <p class="muted">{{ platform.validation_notes }}</p>
@@ -100,5 +233,6 @@
     setting fields are present.
   </p>
 </section>
+{% endif %}
 {% endif %}
 {% endblock %}

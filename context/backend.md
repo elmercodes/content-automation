@@ -10,6 +10,7 @@ into an API-first or cloud-oriented system.
 - Local settings in `app/config.py`
 - Compose flow orchestration in `app/compose_service.py`
 - Local upload and image metadata helpers in `app/media_uploads.py`
+- Platform selection orchestration in `app/platform_selection_service.py`
 - SQLite persistence helpers and ORM models in `app/db/`
 - Platform registry in `app/platforms/registry.py`
 - Router entrypoint in `app/web/router.py`
@@ -33,6 +34,9 @@ into an API-first or cloud-oriented system.
 - Settings: load from `.env` and local defaults only
 - Compose flow: normalize form input, validate basic upload rules, and create
   master posts plus media items locally
+- Platform selection flow: load one saved master post, resolve configured and
+  eligible platforms, validate selected platforms, and hand the workflow into
+  platform review
 - Persistence runtime: obtain synchronous SQLAlchemy sessions from `app/db/`
   and keep SQLite access backend-owned
 - Platform registry: expose configured-platform visibility and coarse capability

@@ -320,6 +320,65 @@ code {
   line-height: 1.6;
 }
 
+.platform-selection-form {
+  display: grid;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.platform-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.platform-fieldset legend {
+  padding: 0;
+  font-weight: 600;
+}
+
+.platform-choice-list {
+  display: grid;
+  gap: 0.9rem;
+  margin-top: 1rem;
+}
+
+.platform-choice-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.9rem;
+  align-items: start;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: rgba(255, 252, 246, 0.92);
+}
+
+.platform-choice-control {
+  padding-top: 0.15rem;
+}
+
+.platform-choice-control input {
+  width: 1rem;
+  height: 1rem;
+}
+
+.platform-choice-copy {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.media-summary-list {
+  margin: 1rem 0 0;
+  padding-left: 1.25rem;
+  color: var(--muted);
+  line-height: 1.7;
+}
+
+.media-summary-list li + li {
+  margin-top: 0.45rem;
+}
+
 .success-card {
   border-color: rgba(95, 49, 17, 0.18);
   background: linear-gradient(

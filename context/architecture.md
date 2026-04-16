@@ -14,6 +14,8 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   more media item persistence for the compose flow.
 - `app/media_uploads.py` owns local upload validation, file saves, metadata
   extraction, and cleanup on failed compose attempts.
+- `app/platform_selection_service.py` owns configured-platform resolution,
+  lightweight eligibility checks, and the platform-review workflow handoff.
 - `app/db/` owns the SQLite local database models, engine/session helpers, and
   persistence metadata.
 - `app/platforms/registry.py` is the backend-owned platform registry for
@@ -35,6 +37,8 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   Alembic
 - Platform registry: supported-platform metadata and configured-platform
   visibility
+- Workflow handoff: `post_id` plus repeated `platform_slug` query params between
+  platform selection and platform review
 - SQLite: durable app state
 - Local filesystem: uploads, generated media, and the SQLite file itself
 - Platform adapters: deferred until later phases
@@ -42,11 +46,11 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
 ## Intended Flow
 
 1. The browser submits a request to the FastAPI app.
-2. The backend loads settings, validates input, saves local uploads, and
-   coordinates workflow logic.
+2. The backend loads settings, validates input, saves local uploads, resolves
+   configured platforms, and coordinates workflow logic.
 3. Persistent data is stored in SQLite and media files remain on local disk.
-4. The backend renders the next HTML response or returns a simple status
-   payload.
+4. The backend renders the next HTML response or redirects to the next
+   server-rendered workflow step.
 
 ## Structural Rules
 

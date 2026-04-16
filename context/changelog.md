@@ -4,6 +4,11 @@ Notable repository changes are listed here in a short human-readable form.
 
 ## 2026-04-16
 
+- Completed Phase 6 with a real configured-platform selection step, lightweight
+  eligibility guardrails, and a URL-based handoff into platform review.
+- Added backend platform-selection helpers, server-rendered selection and
+  review states, and tests covering configured-platform visibility plus
+  validation.
 - Completed Phase 5 with a real compose form, local image upload intake,
   ordered media item persistence, and handoff into the platforms page.
 - Added backend compose and upload helpers, server-rendered validation states,

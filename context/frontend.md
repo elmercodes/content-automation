@@ -11,6 +11,7 @@ JavaScript application shell.
 - Workflow pages in `app/templates/pages/`
 - Static styling in `app/static/styles.css`
 - A real multipart compose form now lives on `pages/compose.html`
+- A real configured-platform selection form now lives on `pages/platforms.html`
 
 ## Direction
 
@@ -29,6 +30,8 @@ JavaScript application shell.
 - Keep visual state understandable from rendered HTML alone.
 - When form validation fails, preserve text inputs and render explicit error
   messages in HTML.
+- Keep platform-selection state explicit in the URL handoff between steps rather
+  than relying on hidden client-side state or JavaScript.
 
 ## No-JS Boundary
 
@@ -37,8 +40,9 @@ JavaScript application shell.
 - Do not move validation or platform-selection rules into browser code.
 - Keep file-selection expectations honest: browsers will require media files to
   be selected again after a validation failure.
-- Keep placeholder pages honest. If a phase is not implemented yet, say so in
-  the rendered HTML instead of simulating fake behavior.
+- Keep safe empty states honest. If a workflow step is opened without the
+  required `post_id` or selected platforms, render an explanatory HTML state
+  instead of simulating fake progress.
 
 ## Related Docs
 

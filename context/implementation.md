@@ -1,7 +1,7 @@
 # Implementation Tracker
 
 Status legend: Not Started | In Progress | Completed
-Current phase: Phase 6 - Platform selection flow
+Current phase: Phase 7 - Preview engine and image normalization
 
 | Phase | Status | Summary |
 | --- | --- | --- |
@@ -10,8 +10,8 @@ Current phase: Phase 6 - Platform selection flow
 | 3. Core app skeleton and config | Completed | Built the real app shell, settings layer, platform registry foundation, and page flow skeleton |
 | 4. Database and migrations | Completed | Implemented SQLite models, runtime session setup, and the first Alembic migration |
 | 5. Compose form and upload pipeline | Completed | Built the server-rendered compose form, local upload pipeline, and master post creation flow |
-| 6. Platform selection flow | In Progress | Show only configured platforms and capture user choices |
-| 7. Preview engine and image normalization | Not Started | Generate platform-aware previews and normalize media |
+| 6. Platform selection flow | Completed | Show only configured platforms and capture user choices |
+| 7. Preview engine and image normalization | In Progress | Generate platform-aware previews and normalize media |
 | 8. Carousel support | Not Started | Support ordered multi-image posts and validations |
 | 9. Platform adapters and posting | Not Started | Implement provider posting integrations and safe submission |
 | 10. Results and post history | Not Started | Record outcomes and expose local history views |
@@ -40,3 +40,6 @@ Current phase: Phase 6 - Platform selection flow
 - 2026-04-16: Phase 5 completed with a real compose form, local image upload
   intake, media metadata capture, cleanup on failed submissions, and a handoff
   into the platforms page. Phase 6 is now in progress.
+- 2026-04-16: Phase 6 completed with a real configured-platform selection form,
+  lightweight eligibility guardrails, and a URL-based handoff into platform
+  review. Phase 7 is now in progress.

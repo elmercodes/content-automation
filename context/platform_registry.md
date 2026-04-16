@@ -1,8 +1,8 @@
 # Platform Registry
 
-The application should present only platforms that are configured locally. A
-platform registry will eventually provide the backend with a single source of
-truth for visibility, capability rules, and credential expectations.
+The application should present only platforms that are configured locally. The
+platform registry is the backend-owned source of truth for visibility,
+capability rules, and credential expectations.
 
 ## Direction
 
@@ -11,21 +11,32 @@ truth for visibility, capability rules, and credential expectations.
 - Centralize platform capabilities so validation and UI decisions share the same
   source of truth.
 
-## Phase 3 Baseline
+## Phase 6 Baseline
 
 - The registry lives in `app/platforms/registry.py`.
-- Phase 3 currently includes `instagram`, `facebook`, and `x` as supported
-  platform slugs because those are the only local credential hints documented in
+- The supported platform set currently includes `instagram`, `facebook`, and
+  `x` because those are the only local credential hints documented in
   `.env.example`.
-- Registry entries currently hold:
+- Registry entries hold:
   - stable slug and display name
   - required settings fields for local visibility
   - coarse capability metadata such as carousel support, maximum carousel size,
     allowed media types, and broad caption limits
-  - lightweight validation notes for placeholder UI display
-- Phase 3 "configured" means the platform is visible in the local UI because
-  its required setting fields are present. It does not yet mean the future
-  adapter contract is complete.
+  - lightweight validation notes that can be shown in server-rendered workflow
+    pages
+- `configured` means the platform is visible in the local UI because its
+  required setting fields are present in `.env`.
+- Phase 6 uses the registry for the first real workflow decision: the
+  platform-selection page shows only configured platforms and then applies
+  post-specific eligibility guardrails in backend service code before a
+  platform can be selected.
+
+## Supported vs Configured vs Eligible
+
+- `supported in code`: present in `PLATFORM_REGISTRY`
+- `configured locally`: required settings are present in `.env`
+- `eligible for the workflow step`: configured and not blocked by the current
+  master post or its media items
 
 ## Registry Responsibilities
 
@@ -37,6 +48,8 @@ truth for visibility, capability rules, and credential expectations.
 ## Boundaries
 
 - The registry is a backend concern, not a template concern.
+- Post-specific eligibility checks belong in workflow service code, not in the
+  registry itself.
 - Provider-specific HTTP logic is deferred until the adapter phase.
 - Exact adapter credential rules, submission payload details, and final
   validation behavior are deferred until later phases.
