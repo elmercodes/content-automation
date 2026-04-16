@@ -18,7 +18,7 @@ async def test_homepage_renders() -> None:
 
     assert response.status_code == 200
     assert "Local-First Social Publisher" in response.text
-    assert "App skeleton and settings layer" in response.text
+    assert "Database layer and migration foundation" in response.text
 
 
 @pytest.mark.anyio

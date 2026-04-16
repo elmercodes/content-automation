@@ -10,13 +10,15 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   startup.
 - `app/config.py` owns the settings layer, `.env` loading, and repo-stable
   local path resolution.
+- `app/db/` owns the SQLite local database models, engine/session helpers, and
+  persistence metadata.
 - `app/platforms/registry.py` is the backend-owned platform registry for
   supported-platform metadata and configured-platform visibility.
 - `app/web/router.py` and `app/web/routes/` define the server-rendered route
   shell for home, compose, platform review, results, and history pages.
 - `app/templates/` now includes a shared base layout, workflow partials, and
   placeholder pages for the future publishing flow.
-- Alembic is scaffolded, but no SQLAlchemy metadata is connected yet.
+- `alembic/` owns the migration layer and is wired to the SQLAlchemy metadata.
 
 ## Runtime Boundaries
 
@@ -25,6 +27,8 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   lifecycle
 - Settings layer: local configuration, `.env` loading, and local path
   conventions
+- Migration layer: explicit schema history and local DB upgrades through
+  Alembic
 - Platform registry: supported-platform metadata and configured-platform
   visibility
 - SQLite: durable app state

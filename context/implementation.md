@@ -1,15 +1,15 @@
 # Implementation Tracker
 
 Status legend: Not Started | In Progress | Completed
-Current phase: Phase 4 - Database and migrations
+Current phase: Phase 5 - Compose form and upload pipeline
 
 | Phase | Status | Summary |
 | --- | --- | --- |
 | 1. Foundation and environment | Completed | Repo bootstrap, tooling, local run flow, minimal docs, localhost smoke app |
 | 2. AI-agent docs system | Completed | Expanded context docs, ADRs, navigation, and agent maintenance guidance |
 | 3. Core app skeleton and config | Completed | Built the real app shell, settings layer, platform registry foundation, and page flow skeleton |
-| 4. Database and migrations | In Progress | Implement SQLite models and first Alembic migration |
-| 5. Compose form and upload pipeline | Not Started | Build post composition and local media intake |
+| 4. Database and migrations | Completed | Implemented SQLite models, runtime session setup, and the first Alembic migration |
+| 5. Compose form and upload pipeline | In Progress | Build post composition and local media intake |
 | 6. Platform selection flow | Not Started | Show only configured platforms and capture user choices |
 | 7. Preview engine and image normalization | Not Started | Generate platform-aware previews and normalize media |
 | 8. Carousel support | Not Started | Support ordered multi-image posts and validations |
@@ -34,3 +34,6 @@ Current phase: Phase 4 - Database and migrations
 - 2026-04-15: Phase 3 completed with modular web routing, a centralized
   settings layer, repo-stable storage paths, a backend platform registry, and
   placeholder server-rendered workflow pages. Phase 4 is now in progress.
+- 2026-04-16: Phase 4 completed with the first SQLAlchemy models, SQLite
+  runtime session helpers, a wired Alembic migration layer, and DB-specific
+  tests. Phase 5 is now in progress.

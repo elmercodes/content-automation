@@ -9,7 +9,7 @@ from app.main import app
 @pytest.mark.parametrize(
     ("path", "expected_text"),
     [
-        ("/", "App skeleton and settings layer"),
+        ("/", "Database layer and migration foundation"),
         ("/compose", "Master post shell"),
         ("/platforms", "No platforms are configured locally"),
         ("/review/platforms", "Future platform-aware checks"),

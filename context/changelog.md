@@ -2,6 +2,15 @@
 
 Notable repository changes are listed here in a short human-readable form.
 
+## 2026-04-16
+
+- Completed Phase 4 with the first SQLAlchemy models for master posts, ordered
+  media items, and post platform logs.
+- Wired Alembic to the app metadata, added the first migration revision, and
+  documented the local migration workflow.
+- Added SQLite runtime session helpers, DB-focused automated tests, and updated
+  repo docs for the new persistence baseline.
+
 ## 2026-04-15
 
 - Completed Phase 3 with a modular server-rendered app skeleton, centralized

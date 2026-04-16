@@ -1,39 +1,67 @@
 # Database Direction
 
-The repo is moving toward a small local SQLite schema managed with SQLAlchemy
-and Alembic. Phase 2 documents the intended record model without locking every
-column or migration detail yet.
+The application now uses a small local SQLite schema managed through
+SQLAlchemy models in `app/db/` and Alembic revisions under `alembic/versions/`.
+The schema stays intentionally narrow: master posts, ordered media items, and
+post platform logs.
 
 ## Current Baseline
 
-- SQLite is already the configured database target.
-- Alembic is scaffolded through `alembic/`.
-- No SQLAlchemy models or metadata are wired into migrations yet.
+- The SQLite local database URL comes from the settings layer in
+  `app/config.py`.
+- The default database file lives at `storage/db/app.db`.
+- SQLAlchemy model metadata lives in `app/db/base.py` and `app/db/models.py`.
+- Runtime engine and session helpers live in `app/db/session.py`.
+- Alembic is wired to the app metadata and owns schema history from the first
+  revision forward.
 
-## Conceptual Records
+## Core Tables
 
-- `posts`: stores each master post and the shared content needed to publish it
-- `media_items`: stores ordered media attached to a master post
-- `post_platform_logs`: stores per-platform submission records and outcomes
+- `posts`: the master post record with shared caption and hashtag text plus
+  created and updated timestamps
+- `media_items`: ordered assets attached to a master post with a durable
+  `display_order` field, local file path reference, and lightweight media
+  metadata
+- `post_platform_logs`: per-platform operational records for submission intent
+  or outcome, including platform slug, status, optional external post ID, and
+  optional error details
 
-## Relationship Direction
+## Relationship and Constraint Rules
 
-- One master post can have one or more media items.
-- Media items keep an explicit order so carousel behavior is durable.
-- One master post can have one or more post platform logs over time.
-- Post platform logs should capture enough information to explain what happened
-  for each platform attempt.
+- One master post can have many media items.
+- One master post can have many post platform logs.
+- `media_items.display_order` is first-class and unique per master post.
+- `display_order` is zero-based and must be non-negative.
+- `media_items.media_type` is limited to `image` or `video`.
+- `post_platform_logs.status` is limited to `pending`, `posted`, or `failed`.
+- `platform_slug` stores the backend platform registry slug such as
+  `instagram`, `facebook`, or `x`.
+- `file_path` stores a path relative to the local `storage/` root rather than
+  an absolute machine path.
 
-## Boundaries
+## Runtime Rules
 
 - SQLite remains the only supported database engine.
-- SQLAlchemy should own model definitions once Phase 4 begins.
-- Alembic should own schema migration history.
-- Exact columns, indexes, and enum strategy remain Phase 4 work.
+- SQLAlchemy sessions are synchronous and backend-owned.
+- SQLite foreign-key enforcement is enabled at connection time.
+- App startup creates the local storage directories, but schema creation and
+  upgrades stay explicit through Alembic.
+
+## Local Workflow
+
+Apply the current schema before running the app on a clean checkout:
+
+```bash
+.venv/bin/alembic upgrade head
+```
+
+Create new schema changes through Alembic revisions instead of manual table
+edits.
 
 ## Related Docs
 
 - [`product_overview.md`](product_overview.md) for terminology
+- [`architecture.md`](architecture.md) for runtime boundaries
 - [`media_pipeline.md`](media_pipeline.md) for media lifecycle expectations
 - [`decisions/003_sqlite_sqlalchemy_choice.md`](decisions/003_sqlite_sqlalchemy_choice.md)
   and

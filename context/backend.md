@@ -8,10 +8,11 @@ into an API-first or cloud-oriented system.
 
 - FastAPI app factory in `app/main.py`
 - Local settings in `app/config.py`
+- SQLite persistence helpers and ORM models in `app/db/`
 - Platform registry in `app/platforms/registry.py`
 - Router entrypoint in `app/web/router.py`
 - Route modules under `app/web/routes/`
-- Alembic scaffold without active models
+- Alembic migration layer with the first active schema revision
 
 ## Direction
 
@@ -26,6 +27,8 @@ into an API-first or cloud-oriented system.
 ## Boundaries
 
 - Settings: load from `.env` and local defaults only
+- Persistence runtime: obtain synchronous SQLAlchemy sessions from `app/db/`
+  and keep SQLite access backend-owned
 - Platform registry: expose configured-platform visibility and coarse capability
   metadata to the web layer
 - Web layer: translate HTTP requests into domain actions and rendered responses
