@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-intro">
+  <p class="section-eyebrow">Final review</p>
+  <h1>Submission checkpoint shell</h1>
+  <p>
+    This page will become the last server-rendered checkpoint before the app
+    calls platform adapters.
+  </p>
+</section>
+
+<section class="card-grid">
+  <article class="card">
+    <h2>Future responsibilities</h2>
+    <ul class="feature-list">
+      <li>Show the final master post summary</li>
+      <li>List the selected platforms and ordered media items</li>
+      <li>Surface final warnings before safe submission</li>
+    </ul>
+  </article>
+
+  <article class="card">
+    <h2>Deferred for later phases</h2>
+    <p>
+      No submission button exists yet because provider adapters, persistence,
+      and validation are intentionally deferred.
+    </p>
+  </article>
+</section>
+{% endblock %}

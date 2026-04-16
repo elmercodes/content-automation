@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
-from app.web.routes import router
+from app.web import router
 
 APP_DIR = Path(__file__).resolve().parent
 

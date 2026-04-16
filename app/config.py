@@ -5,6 +5,14 @@ from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+
+def _resolve_repo_path(path: Path) -> Path:
+    if path.is_absolute():
+        return path
+    return (PROJECT_ROOT / path).resolve()
+
 
 class Settings(BaseSettings):
     app_name: str = "Local-First Social Publisher"
@@ -15,6 +23,9 @@ class Settings(BaseSettings):
     storage_root: Path = Path("storage")
     uploads_dir: Path = Path("storage/uploads")
     generated_dir: Path = Path("storage/generated")
+    instagram_access_token: str | None = None
+    facebook_page_id: str | None = None
+    x_api_key: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -23,20 +34,41 @@ class Settings(BaseSettings):
     )
 
     @property
+    def project_root(self) -> Path:
+        return PROJECT_ROOT
+
+    @property
+    def storage_root_path(self) -> Path:
+        return _resolve_repo_path(self.storage_root)
+
+    @property
+    def uploads_path(self) -> Path:
+        return _resolve_repo_path(self.uploads_dir)
+
+    @property
+    def generated_path(self) -> Path:
+        return _resolve_repo_path(self.generated_dir)
+
+    @property
     def database_path(self) -> Path:
         sqlite_prefix = "sqlite:///"
         if not self.database_url.startswith(sqlite_prefix):
             raise ValueError("Only local SQLite database URLs are supported.")
-        return Path(self.database_url.removeprefix(sqlite_prefix))
+        return _resolve_repo_path(Path(self.database_url.removeprefix(sqlite_prefix)))
+
+    @property
+    def database_dir(self) -> Path:
+        return self.database_path.parent
 
     @property
     def local_storage_paths(self) -> tuple[Path, ...]:
-        return (
-            self.storage_root,
-            self.uploads_dir,
-            self.generated_dir,
-            self.database_path.parent,
+        paths = (
+            self.storage_root_path,
+            self.uploads_path,
+            self.generated_path,
+            self.database_dir,
         )
+        return tuple(dict.fromkeys(paths))
 
 
 @lru_cache

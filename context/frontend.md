@@ -7,7 +7,8 @@ JavaScript application shell.
 ## Current Baseline
 
 - Shared layout in `app/templates/base.html`
-- Phase 1 homepage in `app/templates/pages/index.html`
+- Shared partials in `app/templates/partials/`
+- Workflow placeholder pages in `app/templates/pages/`
 - Static styling in `app/static/styles.css`
 
 ## Direction
@@ -20,6 +21,8 @@ JavaScript application shell.
 ## Template Rules
 
 - Use Jinja2 for layout composition and repeated fragments.
+- Keep a shared page shell for nav and workflow progress so later pages reuse a
+  stable structure.
 - Keep business logic out of templates.
 - Pass already-prepared page state from route handlers into the template.
 - Keep visual state understandable from rendered HTML alone.
@@ -29,6 +32,8 @@ JavaScript application shell.
 - Do not introduce a JavaScript frontend framework.
 - Do not depend on client-side state to make page flow work.
 - Do not move validation or platform-selection rules into browser code.
+- Keep placeholder pages honest. If a phase is not implemented yet, say so in
+  the rendered HTML instead of simulating fake behavior.
 
 ## Related Docs
 

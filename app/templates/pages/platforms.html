@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-intro">
+  <p class="section-eyebrow">Platforms</p>
+  <h1>Configured platform visibility</h1>
+  <p>
+    The platform registry is now the single source of truth for which platforms
+    exist in code and which ones are visible from local settings.
+  </p>
+</section>
+
+{% if configured_platforms %}
+<section class="card-grid">
+  {% for platform in configured_platforms %}
+  <article class="card">
+    <h2>{{ platform.display_name }}</h2>
+    <dl class="details compact-details">
+      <div>
+        <dt>Slug</dt>
+        <dd><code>{{ platform.slug }}</code></dd>
+      </div>
+      <div>
+        <dt>Carousel</dt>
+        <dd>
+          {% if platform.supports_carousel %}
+          Supported up to {{ platform.max_carousel_items }} items
+          {% else %}
+          Not yet marked for carousel
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Media types</dt>
+        <dd>{{ platform.allowed_media_types | join(", ") }}</dd>
+      </div>
+      <div>
+        <dt>Caption rule</dt>
+        <dd>
+          {% if platform.caption_limit %}
+          Up to {{ platform.caption_limit }} characters
+          {% else %}
+          Deferred to later validation work
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+    <p class="muted">{{ platform.validation_notes }}</p>
+  </article>
+  {% endfor %}
+</section>
+{% else %}
+<section class="empty-state">
+  <h2>No platforms are configured locally</h2>
+  <p>
+    Add local values in <code>.env</code> using the names shown in
+    <code>.env.example</code>. The page will only show platforms whose required
+    setting fields are present.
+  </p>
+</section>
+{% endif %}
+{% endblock %}

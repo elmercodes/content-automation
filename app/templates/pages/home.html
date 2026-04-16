@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-intro">
+  <p class="section-eyebrow">Phase 3</p>
+  <h1>App skeleton and settings layer</h1>
+  <p>
+    The project now has a real local-only app shell: centralized settings,
+    route modules, a platform registry, and placeholder pages for the
+    server-rendered workflow.
+  </p>
+</section>
+
+<section class="card-grid">
+  <article class="card">
+    <h2>Workflow shell</h2>
+    <p>
+      The future flow is visible without pretending later phases already exist.
+    </p>
+    <ul class="feature-list">
+      <li><a href="{{ request.url_for('compose') }}">Compose</a> for the master post form shell</li>
+      <li><a href="{{ request.url_for('platforms') }}">Platforms</a> for configured platform visibility</li>
+      <li><a href="{{ request.url_for('review_platforms') }}">Platform review</a> for future validation output</li>
+      <li><a href="{{ request.url_for('review_final') }}">Final review</a> before safe submission</li>
+      <li><a href="{{ request.url_for('results') }}">Results</a> for eventual post platform logs</li>
+    </ul>
+  </article>
+
+  <article class="card">
+    <h2>Local runtime paths</h2>
+    <dl class="details">
+      <div>
+        <dt>Storage root</dt>
+        <dd>{{ settings.storage_root_path }}</dd>
+      </div>
+      <div>
+        <dt>Uploads</dt>
+        <dd>{{ settings.uploads_path }}</dd>
+      </div>
+      <div>
+        <dt>Generated</dt>
+        <dd>{{ settings.generated_path }}</dd>
+      </div>
+      <div>
+        <dt>SQLite file</dt>
+        <dd>{{ settings.database_path }}</dd>
+      </div>
+    </dl>
+  </article>
+
+  <article class="card">
+    <h2>Platform registry</h2>
+    <p>
+      Supported platforms live in backend code. The UI only exposes platforms
+      configured locally through <code>.env</code>.
+    </p>
+    {% if configured_platforms %}
+    <ul class="feature-list">
+      {% for platform in configured_platforms %}
+      <li>{{ platform.display_name }} is configured</li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p class="muted">
+      No configured platforms yet. Add local credentials in <code>.env</code>
+      to make a platform visible in the workflow.
+    </p>
+    {% endif %}
+  </article>
+
+  <article class="card">
+    <h2>Supported platform slugs</h2>
+    <ul class="feature-list">
+      {% for platform in supported_platforms %}
+      <li>{{ platform.display_name }} (<code>{{ platform.slug }}</code>)</li>
+      {% endfor %}
+    </ul>
+  </article>
+</section>
+{% endblock %}

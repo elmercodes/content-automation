@@ -8,8 +8,14 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
 
 - `app/main.py` creates the FastAPI app and ensures local storage paths exist at
   startup.
-- `app/web/routes.py` contains a minimal server-rendered homepage and a health
-  endpoint.
+- `app/config.py` owns the settings layer, `.env` loading, and repo-stable
+  local path resolution.
+- `app/platforms/registry.py` is the backend-owned platform registry for
+  supported-platform metadata and configured-platform visibility.
+- `app/web/router.py` and `app/web/routes/` define the server-rendered route
+  shell for home, compose, platform review, results, and history pages.
+- `app/templates/` now includes a shared base layout, workflow partials, and
+  placeholder pages for the future publishing flow.
 - Alembic is scaffolded, but no SQLAlchemy metadata is connected yet.
 
 ## Runtime Boundaries
@@ -17,7 +23,10 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
 - Browser: standard HTML form submission and navigation only
 - FastAPI app: routing, request handling, response rendering, and startup
   lifecycle
-- Settings layer: local configuration and `.env` loading
+- Settings layer: local configuration, `.env` loading, and local path
+  conventions
+- Platform registry: supported-platform metadata and configured-platform
+  visibility
 - SQLite: durable app state
 - Local filesystem: uploads, generated media, and the SQLite file itself
 - Platform adapters: deferred until later phases
@@ -25,7 +34,8 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
 ## Intended Flow
 
 1. The browser submits a request to the FastAPI app.
-2. The backend loads settings, validates input, and coordinates domain logic.
+2. The backend loads settings, resolves configured platforms, validates input,
+   and coordinates domain logic.
 3. Persistent data is stored in SQLite and media files remain on local disk.
 4. The backend renders the next HTML response or returns a simple status
    payload.

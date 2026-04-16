@@ -4,6 +4,9 @@ Notable repository changes are listed here in a short human-readable form.
 
 ## 2026-04-15
 
+- Completed Phase 3 with a modular server-rendered app skeleton, centralized
+  settings/path handling, a platform registry foundation, and placeholder
+  workflow pages.
 - Completed Phase 2 documentation expansion with topic docs, ADRs, a real
   context index, and stronger agent guidance.
 - Documented the durable product, architecture, backend, frontend, database,

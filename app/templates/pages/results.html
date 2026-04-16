@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-intro">
+  <p class="section-eyebrow">Results</p>
+  <h1>Post platform log placeholder</h1>
+  <p>
+    This route reserves the eventual results page where post platform logs will
+    summarize submission outcomes for each configured platform.
+  </p>
+</section>
+
+<section class="card-grid">
+  <article class="card">
+    <h2>Planned outcome details</h2>
+    <ul class="feature-list">
+      <li>Per-platform status and error summaries</li>
+      <li>Timestamps for attempts and results</li>
+      <li>Links back to the originating master post context</li>
+    </ul>
+  </article>
+
+  <article class="card">
+    <h2>Current behavior</h2>
+    <p>
+      Phase 3 exposes only the route and layout. No post platform logs are
+      created yet.
+    </p>
+  </article>
+</section>
+{% endblock %}

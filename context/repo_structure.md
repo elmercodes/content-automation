@@ -6,8 +6,11 @@ top-level directories without a clear reason.
 ## Current Layout
 
 - `app/` - application package
-- `app/web/` - web routes and template-facing request handlers
+- `app/platforms/` - platform registry metadata and configured-platform helpers
+- `app/web/` - router entrypoint, route modules, and template helpers
+- `app/web/routes/` - server-rendered page handlers grouped by area
 - `app/templates/` - Jinja2 templates
+- `app/templates/partials/` - shared template fragments
 - `app/static/` - CSS and other static assets
 - `alembic/` - migration scaffold and future migration revisions
 - `context/` - durable project and agent documentation
@@ -17,11 +20,14 @@ top-level directories without a clear reason.
 
 ## Placement Rules
 
-- Put request handlers and page flow code under `app/web/`.
+- Put request handlers and page flow code under `app/web/routes/`.
+- Keep platform registry code in `app/platforms/`.
 - Keep configuration and settings logic near `app/config.py` unless growth makes
   a dedicated settings module necessary.
 - Add future persistence modules under `app/` rather than creating a separate
   service repository or package tree.
+- Do not create empty `services`, `models`, `adapters`, or `utils` packages
+  before a phase needs them.
 - Keep repo-facing guidance in `AGENTS.md` and topic-specific guidance under
   `context/`.
 

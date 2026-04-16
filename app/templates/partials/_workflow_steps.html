@@ -1,0 +1,9 @@
+<section class="workflow-shell" aria-label="Workflow steps">
+  <ol class="workflow-steps">
+    {% for step in workflow_steps %}
+    <li class="workflow-step{% if step.key == workflow_step %} is-current{% endif %}">
+      <a href="{{ request.url_for(step.route_name) }}">{{ step.label }}</a>
+    </li>
+    {% endfor %}
+  </ol>
+</section>

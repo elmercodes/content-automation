@@ -1,0 +1,20 @@
+<nav class="primary-nav" aria-label="Primary">
+  <a
+    class="nav-link{% if active_page == 'home' %} is-active{% endif %}"
+    href="{{ request.url_for('home') }}"
+  >
+    Home
+  </a>
+  <a
+    class="nav-link{% if active_page == 'compose' %} is-active{% endif %}"
+    href="{{ request.url_for('compose') }}"
+  >
+    Compose
+  </a>
+  <a
+    class="nav-link{% if active_page == 'history' %} is-active{% endif %}"
+    href="{{ request.url_for('history') }}"
+  >
+    History
+  </a>
+</nav>

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-intro">
+  <p class="section-eyebrow">Compose</p>
+  <h1>Master post shell</h1>
+  <p>
+    This page reserves the place where the user will draft a master post with a
+    caption, hashtags, and media items. The actual form and upload pipeline are
+    deferred to later phases.
+  </p>
+</section>
+
+<section class="card-grid">
+  <article class="card">
+    <h2>Planned inputs</h2>
+    <ul class="feature-list">
+      <li>Caption field for shared post copy</li>
+      <li>Hashtag entry for reusable metadata</li>
+      <li>Ordered media items for single media and carousel workflows</li>
+    </ul>
+  </article>
+
+  <article class="card">
+    <h2>Deferred behavior</h2>
+    <p>
+      No files are accepted here yet, and no master post is written to SQLite
+      during Phase 3.
+    </p>
+    <p>
+      The next visible step in the shell is <a href="{{ request.url_for('platforms') }}">platform selection</a>.
+    </p>
+  </article>
+</section>
+{% endblock %}

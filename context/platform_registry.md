@@ -11,6 +11,22 @@ truth for visibility, capability rules, and credential expectations.
 - Centralize platform capabilities so validation and UI decisions share the same
   source of truth.
 
+## Phase 3 Baseline
+
+- The registry lives in `app/platforms/registry.py`.
+- Phase 3 currently includes `instagram`, `facebook`, and `x` as supported
+  platform slugs because those are the only local credential hints documented in
+  `.env.example`.
+- Registry entries currently hold:
+  - stable slug and display name
+  - required settings fields for local visibility
+  - coarse capability metadata such as carousel support, maximum carousel size,
+    allowed media types, and broad caption limits
+  - lightweight validation notes for placeholder UI display
+- Phase 3 "configured" means the platform is visible in the local UI because
+  its required setting fields are present. It does not yet mean the future
+  adapter contract is complete.
+
 ## Registry Responsibilities
 
 - Determine whether a platform is configured locally.
@@ -22,7 +38,8 @@ truth for visibility, capability rules, and credential expectations.
 
 - The registry is a backend concern, not a template concern.
 - Provider-specific HTTP logic is deferred until the adapter phase.
-- Exact registry implementation details are deferred until later phases.
+- Exact adapter credential rules, submission payload details, and final
+  validation behavior are deferred until later phases.
 
 ## Related Docs
 

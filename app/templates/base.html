@@ -8,15 +8,25 @@
   </head>
   <body>
     <div class="page-shell">
-      <header class="hero">
-        <p class="eyebrow">Local-First Python Application</p>
-        <h1>{{ settings.app_name }}</h1>
-        <p class="lede">
-          Server-rendered publishing workflow foundation with no JavaScript
-          frontend.
-        </p>
+      <header class="site-header">
+        <div class="site-copy">
+          <p class="eyebrow">Local-only server-rendered workflow</p>
+          <a class="site-title" href="{{ request.url_for('home') }}">
+            {{ settings.app_name }}
+          </a>
+          <p class="lede">
+            Master posts, media items, and post platform logs stay on the local
+            machine with a no-JS frontend.
+          </p>
+        </div>
+        {% include "partials/_primary_nav.html" %}
       </header>
-      <main>
+
+      {% if workflow_step %}
+      {% include "partials/_workflow_steps.html" %}
+      {% endif %}
+
+      <main class="page-content">
         {% block content %}{% endblock %}
       </main>
     </div>

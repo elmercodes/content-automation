@@ -40,5 +40,6 @@ pytest
 
 - Phase 1 foundation is complete.
 - Phase 2 AI-agent docs system is complete.
-- Phase 3 core app skeleton and config is now the current phase.
+- Phase 3 core app skeleton and config is complete.
+- Phase 4 database and migrations is now the current phase.
 - See `context/implementation.md` for the roadmap and current phase tracking.
