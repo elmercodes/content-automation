@@ -13,6 +13,8 @@ top-level directories without a clear reason.
   file generation
 - `app/media_uploads.py` - local upload validation, file saves, metadata, and
   cleanup helpers
+- `app/presentation.py` - backend-owned presentation helpers for timestamps and
+  other repeated display formatting
 - `app/platform_selection_service.py` - configured-platform resolution,
   lightweight workflow eligibility, and handoff helpers
 - `app/preview_service.py` - preview-state assembly and warning generation for
@@ -48,6 +50,8 @@ top-level directories without a clear reason.
   package.
 - Keep history read-side queries in a small top-level app module rather than
   pushing them into route handlers or the submission service.
+- Keep shared presentation helpers small and backend-owned instead of pushing
+  repeated formatting logic into templates.
 - Keep persistence code under `app/db/`.
 - Keep platform registry code in `app/platforms/`.
 - Keep configuration and settings logic near `app/config.py` unless growth makes

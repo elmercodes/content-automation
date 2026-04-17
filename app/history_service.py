@@ -16,6 +16,7 @@ from app.platform_selection_service import (
     WorkflowMediaItemSummary,
 )
 from app.platforms import get_platform
+from app.presentation import format_display_datetime
 
 STATUS_VARIANT_MAP = {
     "pending": "info",
@@ -47,6 +48,16 @@ class PlatformOutcomeSummary:
     error_message: str | None
     response_summary: str | None
 
+    @property
+    def attempted_at_display(self) -> str:
+        return format_display_datetime(self.attempted_at)
+
+    @property
+    def posted_at_display(self) -> str | None:
+        if self.posted_at is None:
+            return None
+        return format_display_datetime(self.posted_at)
+
 
 @dataclass(frozen=True, slots=True)
 class PlatformAttemptSummary:
@@ -60,6 +71,16 @@ class PlatformAttemptSummary:
     external_post_id: str | None
     error_message: str | None
     response_summary: str | None
+
+    @property
+    def attempted_at_display(self) -> str:
+        return format_display_datetime(self.attempted_at)
+
+    @property
+    def posted_at_display(self) -> str | None:
+        if self.posted_at is None:
+            return None
+        return format_display_datetime(self.posted_at)
 
 
 @dataclass(frozen=True, slots=True)
@@ -94,6 +115,16 @@ class HistoryPostListItem:
     latest_activity_at: datetime | None
     has_attempts: bool
 
+    @property
+    def created_at_display(self) -> str:
+        return format_display_datetime(self.created_at)
+
+    @property
+    def latest_activity_at_display(self) -> str | None:
+        if self.latest_activity_at is None:
+            return None
+        return format_display_datetime(self.latest_activity_at)
+
 
 @dataclass(frozen=True, slots=True)
 class HistoryIndexPageState:
@@ -126,6 +157,10 @@ class PostHistoryPageState:
     @property
     def has_attempts(self) -> bool:
         return bool(self.attempt_history)
+
+    @property
+    def created_at_display(self) -> str:
+        return format_display_datetime(self.created_at)
 
 
 def load_results_page_state(

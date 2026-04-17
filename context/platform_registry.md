@@ -35,6 +35,9 @@ capability rules, and credential expectations.
   required setting fields are present in `.env`.
 - `posting ready` means a provider adapter can attempt submission for that
   platform after shared validation and provider-specific credential checks.
+- The current X flow intentionally splits those states: `X_API_KEY` makes X
+  visible in the workflow, while direct posting still requires the remaining X
+  secrets and access tokens.
 - Phase 6 uses the registry for the first real workflow decision: the
   platform-selection page shows only configured platforms and then applies
   post-specific eligibility guardrails in backend service code before a

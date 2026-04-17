@@ -22,6 +22,8 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   per-platform submission orchestration, and post platform log persistence.
 - `app/history_service.py` owns read-side results and history state assembly on
   top of saved posts, media items, and post platform logs.
+- `app/presentation.py` owns small backend-owned display helpers such as
+  human-readable UTC timestamps for results and history pages.
 - `app/image_normalization.py` owns deterministic image normalization and
   generated preview file creation under local storage.
 - `app/db/` owns the SQLite local database models, engine/session helpers, and
@@ -38,8 +40,8 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   originals through narrow backend-owned routes instead of exposing the full
   `storage/` tree.
 - `app/templates/` now includes a shared base layout, workflow partials, and
-  real preview, final-review, results, history index, and history detail pages
-  for the server-rendered workflow.
+  real preview, final-review, results, history index, history detail, and
+  browser-friendly error pages for the server-rendered workflow.
 - `alembic/` owns the migration layer and is wired to the SQLAlchemy metadata.
 
 ## Runtime Boundaries
@@ -64,6 +66,8 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
 - Generated preview route: backend-owned file serving for preview artifacts
 - Uploaded media route: backend-owned file serving for original local uploads
   reused in history views
+- HTML error handling: browser-facing 404-style failures render through the same
+  server-rendered page shell instead of falling back to JSON
 - Posting adapter layer: per-platform runtime validation and provider HTTP
   submission behind a small backend-owned contract
 - Submission orchestration: synchronous, sequential final-review posting with

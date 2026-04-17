@@ -14,6 +14,7 @@ into an API-first or cloud-oriented system.
 - Preview-state orchestration in `app/preview_service.py`
 - Posting orchestration in `app/posting_service.py`
 - Read-side results/history state assembly in `app/history_service.py`
+- Shared display helpers in `app/presentation.py`
 - Deterministic image normalization in `app/image_normalization.py`
 - SQLite persistence helpers and ORM models in `app/db/`
 - Platform registry in `app/platforms/registry.py`
@@ -56,6 +57,8 @@ into an API-first or cloud-oriented system.
 - History service: load newest-first master post summaries, derive latest
   platform outcomes per post, and assemble post-detail ledger views from saved
   media items plus post platform logs
+- Presentation helpers: keep repeated status-label and timestamp formatting out
+  of templates while preserving backend-owned page state
 - Image normalization: preserve uploaded originals, generate derived preview
   images under `storage/generated/`, and avoid default cropping
 - Persistence runtime: obtain synchronous SQLAlchemy sessions from `app/db/`
@@ -70,6 +73,8 @@ into an API-first or cloud-oriented system.
 - Uploaded media route: serve only saved uploads rooted under
   `settings.uploads_path` so history pages can render local thumbnails without
   mounting all of `storage/`
+- Error handling: keep browser-facing page failures server-rendered where
+  reasonable instead of defaulting to JSON responses
 - Adapter layer: keep provider-specific HTTP details and runtime validation out
   of core workflow orchestration
 

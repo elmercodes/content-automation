@@ -11,7 +11,10 @@
     {% if show_attempted_time %}
     <p class="muted">
       Latest attempt:
-      <time datetime="{{ outcome.attempted_at.isoformat() }}">{{ outcome.attempted_at.isoformat() }}</time>
+      <time datetime="{{ outcome.attempted_at.isoformat() }}">{{ outcome.attempted_at_display }}</time>
+      {% if outcome.posted_at %}
+      · Posted <time datetime="{{ outcome.posted_at.isoformat() }}">{{ outcome.posted_at_display }}</time>
+      {% endif %}
     </p>
     {% endif %}
     {% if outcome.external_post_id %}

@@ -19,7 +19,7 @@
         <h2><a href="{{ item.detail_url }}">Master post {{ item.post.post_id }}</a></h2>
         <p class="muted">
           Created
-          <time datetime="{{ item.post.created_at.isoformat() }}">{{ item.post.created_at.isoformat() }}</time>
+          <time datetime="{{ item.post.created_at.isoformat() }}">{{ item.post.created_at_display }}</time>
         </p>
       </div>
       <p class="muted">{{ item.post.format_label }}</p>
@@ -42,7 +42,7 @@
         {% if item.post.latest_activity_at %}
         <p class="muted">
           Latest platform activity:
-          <time datetime="{{ item.post.latest_activity_at.isoformat() }}">{{ item.post.latest_activity_at.isoformat() }}</time>
+          <time datetime="{{ item.post.latest_activity_at.isoformat() }}">{{ item.post.latest_activity_at_display }}</time>
         </p>
         {% else %}
         <p class="muted">No platform attempts yet.</p>

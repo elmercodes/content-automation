@@ -1,59 +1,20 @@
 from __future__ import annotations
 
-from io import BytesIO
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 import pytest
-from alembic.config import Config
 from httpx import ASGITransport, AsyncClient
-from PIL import Image
 from sqlalchemy import select
 
-from alembic import command
-from app.config import PROJECT_ROOT, get_settings
-from app.db import MediaItem, Post, clear_db_runtime_caches, get_session_factory
+from app.config import get_settings
+from app.db import MediaItem, Post, get_session_factory
 from app.main import app
-
-
-def make_image_bytes(*, image_format: str = "PNG", size: tuple[int, int]) -> bytes:
-    buffer = BytesIO()
-    image = Image.new("RGB", size, color=(90, 60, 40))
-    image.save(buffer, format=image_format)
-    return buffer.getvalue()
+from tests.helpers import make_image_bytes
 
 
 def list_uploaded_files(upload_root: Path) -> list[Path]:
     return sorted(path for path in upload_root.rglob("*") if path.is_file())
-
-
-@pytest.fixture
-def isolated_local_runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    storage_root = tmp_path / "storage"
-    uploads_dir = storage_root / "uploads"
-    generated_dir = storage_root / "generated"
-    database_path = storage_root / "db" / "app.db"
-
-    monkeypatch.setenv("STORAGE_ROOT", str(storage_root))
-    monkeypatch.setenv("UPLOADS_DIR", str(uploads_dir))
-    monkeypatch.setenv("GENERATED_DIR", str(generated_dir))
-    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{database_path}")
-
-    get_settings.cache_clear()
-    clear_db_runtime_caches()
-    settings = get_settings()
-    for path in settings.local_storage_paths:
-        path.mkdir(parents=True, exist_ok=True)
-
-    config = Config(str(PROJECT_ROOT / "alembic.ini"))
-    config.attributes["database_url"] = settings.database_url
-    config.set_main_option("script_location", str(PROJECT_ROOT / "alembic"))
-    command.upgrade(config, "head")
-
-    yield storage_root
-
-    get_settings.cache_clear()
-    clear_db_runtime_caches()
 
 
 @pytest.mark.anyio

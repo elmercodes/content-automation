@@ -4,6 +4,12 @@ Notable repository changes are listed here in a short human-readable form.
 
 ## 2026-04-17
 
+- Completed Phase 11 with final shareability polish: stronger onboarding docs,
+  clearer `.env.example` guidance, browser-friendly HTML error pages, cleaned up
+  user-facing copy, and shared test helpers for the main workflow suite.
+- Added setup/runtime coverage for storage initialization and configuration
+  surface accuracy, plus browser-facing coverage for the new HTML not-found
+  state.
 - Completed Phase 10 with a real local history ledger: newest-first history
   index, per-post detail pages, shared results/history outcome presentation,
   and safe uploaded-media rendering through backend-owned routes.

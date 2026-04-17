@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-intro">
+  <p class="section-eyebrow">Error {{ error_status_code }}</p>
+  <h1>{{ error_title }}</h1>
+  <p>{{ error_message }}</p>
+</section>
+
+<section class="card-grid">
+  <article class="card">
+    <h2>Next steps</h2>
+    <div class="button-row compact-button-row">
+      <a class="button-primary" href="{{ request.url_for('home') }}">Return home</a>
+      <a class="button-secondary" href="{{ request.url_for('compose') }}">Go to compose</a>
+      <a class="button-secondary" href="{{ request.url_for('history') }}">Open history</a>
+    </div>
+  </article>
+</section>
+{% endblock %}

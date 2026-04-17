@@ -2,29 +2,42 @@
 
 {% block content %}
 <section class="page-intro">
-  <p class="section-eyebrow">Phase 6</p>
-  <h1>Platform selection and workflow handoff</h1>
+  <p class="section-eyebrow">Local-first social publishing</p>
+  <h1>Draft once, review safely, and keep a local publishing ledger</h1>
   <p>
-    The project now has a real local-only creation workflow: centralized
-    settings, SQLAlchemy persistence, a multipart compose form, local media
-    intake for ordered media items, and configured-platform selection before
-    review.
+    This app runs entirely on your machine. Create a master post, keep ordered
+    local media, review per-platform output, submit where direct posting is
+    supported, and keep a lightweight local history without leaving the browser
+    or adding JavaScript.
   </p>
 </section>
 
 <section class="card-grid">
   <article class="card">
-    <h2>Workflow baseline</h2>
+    <h2>Start locally</h2>
     <p>
-      The workflow now starts with a real compose step and keeps later phases
-      honest about what is still deferred.
+      Use the same server-rendered workflow for both single-image posts and
+      ordered image carousels.
     </p>
     <ul class="feature-list">
-      <li><a href="{{ request.url_for('compose') }}">Compose</a> now saves a master post with local media items</li>
-      <li><a href="{{ request.url_for('platforms') }}">Platforms</a> now shows configured platforms and captures selected platforms</li>
-      <li><a href="{{ request.url_for('review_platforms') }}">Platform review</a> now receives the workflow handoff for future validation output</li>
-      <li><a href="{{ request.url_for('review_final') }}">Final review</a> before safe submission</li>
-      <li><a href="{{ request.url_for('results') }}">Results</a> for eventual post platform logs</li>
+      <li><a href="{{ request.url_for('compose') }}">Compose</a> saves one master post with ordered media items</li>
+      <li><a href="{{ request.url_for('platforms') }}">Platforms</a> shows configured platforms only</li>
+      <li><a href="{{ request.url_for('review_platforms') }}">Platform review</a> renders local previews before submission</li>
+      <li><a href="{{ request.url_for('history') }}">History</a> keeps a durable local ledger of saved posts and outcomes</li>
+    </ul>
+    <div class="button-row compact-button-row">
+      <a class="button-primary" href="{{ request.url_for('compose') }}">Create a post</a>
+      <a class="button-secondary" href="{{ request.url_for('history') }}">Browse history</a>
+    </div>
+  </article>
+
+  <article class="card">
+    <h2>Current provider support</h2>
+    <ul class="feature-list">
+      <li><strong>X</strong> can be previewed and posted directly when all four X credentials are set locally</li>
+      <li><strong>Instagram</strong> can be made visible for review with a local access token, but direct posting is deferred</li>
+      <li><strong>Facebook</strong> can be made visible for review with a local page ID, but direct posting is deferred</li>
+      <li>Carousel support is image-only in this workflow, with platform-specific limits enforced before submission</li>
     </ul>
   </article>
 
@@ -51,24 +64,10 @@
   </article>
 
   <article class="card">
-    <h2>Compose intake</h2>
+    <h2>Configured on this machine</h2>
     <p>
-      Phase 5 accepts JPG, PNG, and WEBP image uploads, stores originals under
-      <code>storage/uploads/</code>, and records width, height, filename, and
-      display order for each media item.
-    </p>
-    <ul class="feature-list">
-      <li>Caption and hashtags remain optional master post fields</li>
-      <li>Upload order becomes durable display order</li>
-      <li>Failed submissions clean up partial files and rows</li>
-    </ul>
-  </article>
-
-  <article class="card">
-    <h2>Platform selection flow</h2>
-    <p>
-      Phase 6 uses the backend platform registry to show only configured
-      platforms and block obviously incompatible selections before review.
+      Platform visibility is driven by the values in <code>.env</code>. The app
+      only shows platforms whose required local settings are present.
     </p>
     {% if configured_platforms %}
     <ul class="feature-list">
@@ -78,8 +77,9 @@
     </ul>
     {% else %}
     <p class="muted">
-      No configured platforms yet. Add local credentials in <code>.env</code>
-      to make a platform visible in the workflow.
+      No configured platforms yet. Add local values in <code>.env</code> using
+      the names shown in <code>.env.example</code> to make a platform visible in
+      the workflow.
     </p>
     {% endif %}
   </article>

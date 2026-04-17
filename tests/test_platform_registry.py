@@ -61,3 +61,21 @@ def test_platform_registry_exposes_image_only_carousel_rules_for_current_workflo
         "x_access_token",
         "x_access_token_secret",
     )
+
+
+def test_x_can_be_visible_without_being_posting_ready() -> None:
+    settings = Settings(_env_file=None, x_api_key="local-key")
+    x_context = next(
+        platform
+        for platform in get_supported_platform_context(settings)
+        if platform["slug"] == "x"
+    )
+
+    assert x_context["configured"] is True
+    assert x_context["missing_settings"] == ()
+    assert x_context["posting_spec"]["enabled"] is True
+    assert x_context["posting_spec"]["missing_settings"] == (
+        "x_api_secret",
+        "x_access_token",
+        "x_access_token_secret",
+    )

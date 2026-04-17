@@ -18,7 +18,9 @@ async def test_homepage_renders() -> None:
 
     assert response.status_code == 200
     assert "Local-First Social Publisher" in response.text
-    assert "Platform selection and workflow handoff" in response.text
+    assert "Draft once, review safely, and keep a local publishing ledger" in (
+        response.text
+    )
 
 
 @pytest.mark.anyio

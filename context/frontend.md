@@ -20,6 +20,7 @@ JavaScript application shell.
   `pages/review_final.html`
 - Real results and history pages now live on `pages/results.html`,
   `pages/history.html`, and `pages/history_detail.html`
+- A real browser-friendly error page now lives on `pages/error.html`
 - Shared latest-outcome and status partials now live under
   `app/templates/partials/`
 
@@ -38,6 +39,8 @@ JavaScript application shell.
 - Keep business logic out of templates.
 - Pass already-prepared page state from route handlers into the template.
 - Keep visual state understandable from rendered HTML alone.
+- Prefer product-centric copy over phase-centric milestone language on
+  user-facing pages.
 - When form validation fails, preserve text inputs and render explicit error
   messages in HTML.
 - Keep platform-selection state explicit in the URL handoff between steps rather
@@ -67,6 +70,8 @@ JavaScript application shell.
 - Keep history media rendering backend-owned. Uploaded originals should be
   requested through a narrow backend route rather than by exposing
   `storage/uploads/` directly.
+- Keep common error states readable in normal browser navigation. Missing pages
+  or records should render as HTML for the main workflow and history surfaces.
 
 ## Related Docs
 

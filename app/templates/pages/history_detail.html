@@ -16,7 +16,7 @@
     <dl class="details compact-details">
       <div>
         <dt>Created at</dt>
-        <dd><time datetime="{{ history_post_state.created_at.isoformat() }}">{{ history_post_state.created_at.isoformat() }}</time></dd>
+        <dd><time datetime="{{ history_post_state.created_at.isoformat() }}">{{ history_post_state.created_at_display }}</time></dd>
       </div>
       <div>
         <dt>Media items</dt>
@@ -130,12 +130,12 @@
       <dl class="details compact-details">
         <div>
           <dt>Attempted at</dt>
-          <dd><time datetime="{{ attempt.attempted_at.isoformat() }}">{{ attempt.attempted_at.isoformat() }}</time></dd>
+          <dd><time datetime="{{ attempt.attempted_at.isoformat() }}">{{ attempt.attempted_at_display }}</time></dd>
         </div>
         {% if attempt.posted_at %}
         <div>
           <dt>Posted at</dt>
-          <dd><time datetime="{{ attempt.posted_at.isoformat() }}">{{ attempt.posted_at.isoformat() }}</time></dd>
+          <dd><time datetime="{{ attempt.posted_at.isoformat() }}">{{ attempt.posted_at_display }}</time></dd>
         </div>
         {% endif %}
         {% if attempt.external_post_id %}

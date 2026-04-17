@@ -1,91 +1,22 @@
 from __future__ import annotations
 
-from io import BytesIO
 from pathlib import Path
 
 import pytest
-from alembic.config import Config
 from fastapi import HTTPException
 from httpx import ASGITransport, AsyncClient
-from PIL import Image
 from sqlalchemy import select
 
-from alembic import command
-from app.config import PROJECT_ROOT, get_settings
+from app.config import get_settings
 from app.db import (
     MediaItem,
     Post,
     PostPlatformLog,
-    clear_db_runtime_caches,
     get_session_factory,
 )
 from app.main import app
 from app.web.routes.media import uploaded_media
-
-
-def make_image_bytes(*, image_format: str = "PNG", size: tuple[int, int]) -> bytes:
-    buffer = BytesIO()
-    image = Image.new("RGB", size, color=(70, 50, 40))
-    image.save(buffer, format=image_format)
-    return buffer.getvalue()
-
-
-@pytest.fixture
-def isolated_local_runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
-    storage_root = tmp_path / "storage"
-    uploads_dir = storage_root / "uploads"
-    generated_dir = storage_root / "generated"
-    database_path = storage_root / "db" / "app.db"
-
-    monkeypatch.setenv("STORAGE_ROOT", str(storage_root))
-    monkeypatch.setenv("UPLOADS_DIR", str(uploads_dir))
-    monkeypatch.setenv("GENERATED_DIR", str(generated_dir))
-    monkeypatch.setenv("DATABASE_URL", f"sqlite:///{database_path}")
-
-    get_settings.cache_clear()
-    clear_db_runtime_caches()
-    settings = get_settings()
-    for path in settings.local_storage_paths:
-        path.mkdir(parents=True, exist_ok=True)
-
-    config = Config(str(PROJECT_ROOT / "alembic.ini"))
-    config.attributes["database_url"] = settings.database_url
-    config.set_main_option("script_location", str(PROJECT_ROOT / "alembic"))
-    command.upgrade(config, "head")
-
-    yield storage_root
-
-    get_settings.cache_clear()
-    clear_db_runtime_caches()
-
-
-async def create_master_post(
-    client: AsyncClient,
-    *,
-    media_sizes: list[tuple[int, int]],
-    caption: str,
-    hashtags: str,
-) -> int:
-    files = [
-        (
-            "media_files",
-            (
-                f"image-{index}.png",
-                make_image_bytes(size=media_size),
-                "image/png",
-            ),
-        )
-        for index, media_size in enumerate(media_sizes)
-    ]
-    response = await client.post(
-        "/compose",
-        data={"caption": caption, "hashtags": hashtags},
-        files=files,
-        follow_redirects=False,
-    )
-
-    assert response.status_code == 303
-    return int(response.headers["location"].split("post_id=")[1])
+from tests.helpers import create_master_post
 
 
 def add_logs_for_post(post_id: int, *, x_status: str, instagram_status: str) -> None:
