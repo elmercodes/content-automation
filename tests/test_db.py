@@ -69,8 +69,9 @@ def test_post_model_round_trip_preserves_order_and_cascades(tmp_path: Path) -> N
                 PostPlatformLog(platform_slug="instagram", status="pending"),
                 PostPlatformLog(
                     platform_slug="x",
-                    status="failed",
+                    status="submission_failed",
                     error_message="API key missing",
+                    response_summary='{"detail":"missing"}',
                 ),
             ],
         )
@@ -127,7 +128,7 @@ def test_post_updated_at_changes_when_row_is_modified(tmp_path: Path) -> None:
         assert post.updated_at > original_updated_at
 
 
-def test_alembic_upgrade_creates_phase_four_schema(tmp_path: Path) -> None:
+def test_alembic_upgrade_creates_phase_nine_schema(tmp_path: Path) -> None:
     clear_db_runtime_caches()
     database_path = tmp_path / "migrated.db"
     config = Config(str(PROJECT_ROOT / "alembic.ini"))
@@ -174,6 +175,11 @@ def test_alembic_upgrade_creates_phase_four_schema(tmp_path: Path) -> None:
         "posted_at",
         "external_post_id",
         "error_message",
+        "response_summary",
+    }
+    assert {index["name"] for index in inspector.get_indexes("post_platform_logs")} >= {
+        "ix_post_platform_logs_post_id",
+        "ix_post_platform_logs_post_id_platform_slug_created_at",
     }
     assert (
         inspector.get_foreign_keys("media_items")[0]["options"]["ondelete"] == "CASCADE"
@@ -188,4 +194,4 @@ def test_alembic_upgrade_creates_phase_four_schema(tmp_path: Path) -> None:
             text("SELECT version_num FROM alembic_version"),
         ).scalar_one()
 
-    assert revision == "2d8d42ce9fad"
+    assert revision == "4f7d2c10c8a8"

@@ -1,7 +1,7 @@
 # Posting Workflow
 
-This file describes the intended publishing sequence at a workflow level. It is
-not an implementation spec for provider adapters yet.
+This file describes the current publishing sequence at a workflow level,
+including the Phase 9 submission handoff.
 
 ## Intended Flow
 
@@ -35,9 +35,19 @@ not an implementation spec for provider adapters yet.
   platform at a time, using the backend platform registry plus image
   normalization to show ordered per-item preview output, text length
   visibility, and obvious warning states.
-- `GET /review/final` now preserves the selected-platform handoff after preview
-  generation and summarizes whether the master post is a single image or image
-  carousel, but still stops before any provider adapter or submission logic.
+- `GET /review/final` preserves the selected-platform handoff after preview
+  generation, summarizes whether the master post is a single image or image
+  carousel, and shows per-platform posting readiness.
+- `POST /review/final` revalidates the selected platforms, blocks duplicate
+  reposts after a successful prior submission, submits selected platforms
+  synchronously in validated order, and writes one post platform log per
+  platform attempt.
+- `GET /results?post_id=<id>&platform_slug=...` now loads the latest saved post
+  platform logs for the just-submitted master post and renders the normalized
+  outcomes.
+- Phase 9 includes one real adapter: X posting for single-image and image-only
+  multi-image submissions. Instagram and Facebook currently normalize to
+  explicit unsupported outcomes instead of crashing the batch.
 - Failed compose or platform-selection submissions return to the same
   server-rendered page with explicit HTML error messages and no partial local
   state retained.
@@ -47,13 +57,14 @@ not an implementation spec for provider adapters yet.
 - Validate before submission, not after.
 - Isolate per-platform outcomes so one failure does not erase other results.
 - Keep enough local history to understand what was attempted and what happened.
+- Keep submission synchronous and sequential in the request-response cycle
+  until a later phase justifies a different execution model.
 
 ## Deferred Details
 
-- Actual adapter implementations
 - Durable platform selection persistence
-- Retry policy and submission concurrency policy
-- Final result and history page design
+- Retry policy beyond explicit user resubmission
+- Rich history browsing UI beyond the current results page
 
 ## Related Docs
 

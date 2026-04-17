@@ -23,8 +23,8 @@ post platform logs.
   `display_order` field, local file path reference, and lightweight media
   metadata
 - `post_platform_logs`: per-platform operational records for submission intent
-  or outcome, including platform slug, status, optional external post ID, and
-  optional error details
+  or outcome, including platform slug, normalized status, optional external
+  post ID, optional error details, and an optional compact response summary
 
 ## Relationship and Constraint Rules
 
@@ -33,11 +33,15 @@ post platform logs.
 - `media_items.display_order` is first-class and unique per master post.
 - `display_order` is zero-based and must be non-negative.
 - `media_items.media_type` is limited to `image` or `video`.
-- `post_platform_logs.status` is limited to `pending`, `posted`, or `failed`.
+- `post_platform_logs.status` is limited to `pending`, `posted`,
+  `not_configured`, `unsupported`, `validation_failed`, or
+  `submission_failed`.
 - `platform_slug` stores the backend platform registry slug such as
   `instagram`, `facebook`, or `x`.
 - `file_path` stores a path relative to the local `storage/` root rather than
   an absolute machine path.
+- Later results and history views should read the latest post platform log per
+  platform rather than introducing a second Phase 9 batch table.
 
 ## Runtime Rules
 

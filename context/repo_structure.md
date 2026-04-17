@@ -17,7 +17,13 @@ top-level directories without a clear reason.
   lightweight workflow eligibility, and handoff helpers
 - `app/preview_service.py` - preview-state assembly and warning generation for
   the review step
-- `app/platforms/` - platform registry metadata and configured-platform helpers
+- `app/posting_service.py` - final-review submission orchestration, results
+  loading, and post platform log updates
+- `app/platforms/` - platform registry metadata, posting adapter types, and
+  provider implementations
+- `app/platforms/adapters.py` - shared posting request/result types plus
+  adapter resolution
+- `app/platforms/x_adapter.py` - real X posting integration
 - `app/web/` - router entrypoint, route modules, and template helpers
 - `app/web/routes/` - server-rendered page handlers grouped by area
 - `app/web/routes/media.py` - backend-owned generated-preview file serving
@@ -35,8 +41,9 @@ top-level directories without a clear reason.
 - Put request handlers and page flow code under `app/web/routes/`.
 - Keep compose orchestration and upload helpers in small top-level app modules
   until the workflow grows enough to justify a deeper package split.
-- Keep platform-selection, preview, and normalization orchestration in small
-  top-level app modules until later phases justify a broader workflow package.
+- Keep platform-selection, preview, normalization, and posting orchestration in
+  small top-level app modules until later phases justify a broader workflow
+  package.
 - Keep persistence code under `app/db/`.
 - Keep platform registry code in `app/platforms/`.
 - Keep configuration and settings logic near `app/config.py` unless growth makes

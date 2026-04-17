@@ -17,6 +17,12 @@ from app.platform_selection_service import (
     load_platform_selection_state,
     validate_platform_selection,
 )
+from app.posting_service import (
+    DuplicateSubmissionError,
+    build_posting_readiness_summaries,
+    load_submission_results_state,
+    submit_reviewed_post,
+)
 from app.preview_service import (
     build_platform_review_page_state,
     build_posting_text_metrics,
@@ -404,8 +410,13 @@ async def review_final(
                 hashtags=review_state.post_summary.hashtags,
                 limit=platform.caption_limit,
             ),
+            "posting_readiness": readiness_summary,
         }
-        for platform in review_state.selected_platforms
+        for platform, readiness_summary in zip(
+            review_state.selected_platforms,
+            build_posting_readiness_summaries(review_state),
+            strict=True,
+        )
     )
 
     return render_page(
@@ -419,18 +430,157 @@ async def review_final(
         selected_platform_summaries=selected_platform_summaries,
         review_platform_url=review_platform_url,
         platform_selection_url=platform_selection_url,
+        submit_review_url=str(request.url_for("submit_review_final")),
+        review_page=review_page,
         final_review_errors=[],
     )
 
 
+@router.post("/review/final", name="submit_review_final", response_class=HTMLResponse)
+async def submit_review_final(request: Request) -> Response:
+    form_data = await request.form()
+    post_id = _parse_post_id(form_data.get("post_id"))
+    platform_index = _parse_post_id(form_data.get("platform_index")) or 0
+    selected_platform_slugs = [
+        str(platform_slug) for platform_slug in form_data.getlist("platform_slug")
+    ]
+
+    if post_id is None:
+        return render_page(
+            request,
+            "pages/review_final.html",
+            page_title="Final Review",
+            active_page="compose",
+            workflow_step="review_final",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            final_review_errors=[
+                "Return to platform review after selecting at least one configured "
+                "platform."
+            ],
+        )
+
+    session_factory = get_session_factory()
+    with session_factory() as db:
+        selection_state = load_platform_selection_state(
+            db,
+            post_id=post_id,
+            selected_platform_slugs=selected_platform_slugs,
+        )
+        if selection_state is None:
+            raise HTTPException(status_code=404, detail="Master post not found.")
+
+        platform_selection_url = str(
+            request.url_for("platforms").include_query_params(post_id=post_id)
+        )
+        result = validate_platform_selection(
+            selection_state,
+            selected_platform_slugs=selected_platform_slugs,
+        )
+        if not result.succeeded:
+            return render_page(
+                request,
+                "pages/review_final.html",
+                page_title="Final Review",
+                active_page="compose",
+                workflow_step="review_final",
+                status_code=status.HTTP_400_BAD_REQUEST,
+                final_review_errors=collect_selection_errors(result),
+                platform_selection_url=platform_selection_url,
+            )
+
+        review_state = build_platform_review_state(
+            selection_state,
+            selected_platform_slugs=result.selected_platform_slugs,
+        )
+        review_page = build_platform_review_page_state(
+            review_state,
+            platform_index=platform_index,
+        )
+        review_platform_url = _build_platform_review_url(
+            request,
+            post_id=post_id,
+            selected_platform_slugs=result.selected_platform_slugs,
+            platform_index=review_page.current_platform_index,
+        )
+        posting_readiness = build_posting_readiness_summaries(review_state)
+        selected_platform_summaries = tuple(
+            {
+                "platform": platform,
+                "text_metrics": build_posting_text_metrics(
+                    caption=review_state.post_summary.caption,
+                    hashtags=review_state.post_summary.hashtags,
+                    limit=platform.caption_limit,
+                ),
+                "posting_readiness": readiness_summary,
+            }
+            for platform, readiness_summary in zip(
+                review_state.selected_platforms,
+                posting_readiness,
+                strict=True,
+            )
+        )
+
+        try:
+            submit_reviewed_post(db, review_state)
+        except DuplicateSubmissionError as exc:
+            return render_page(
+                request,
+                "pages/review_final.html",
+                page_title="Final Review",
+                active_page="compose",
+                workflow_step="review_final",
+                status_code=status.HTTP_400_BAD_REQUEST,
+                review_post_summary=review_state.post_summary,
+                selected_platforms=review_state.selected_platforms,
+                selected_platform_summaries=selected_platform_summaries,
+                review_platform_url=review_platform_url,
+                platform_selection_url=platform_selection_url,
+                submit_review_url=str(request.url_for("submit_review_final")),
+                review_page=review_page,
+                final_review_errors=[str(exc)],
+            )
+
+    redirect_target = _build_results_url(
+        request,
+        post_id=post_id,
+        selected_platform_slugs=tuple(result.selected_platform_slugs),
+    )
+    return RedirectResponse(
+        url=redirect_target,
+        status_code=status.HTTP_303_SEE_OTHER,
+    )
+
+
 @router.get("/results", name="results", response_class=HTMLResponse)
-async def results(request: Request) -> HTMLResponse:
+async def results(request: Request, post_id: int | None = None) -> HTMLResponse:
+    selected_platform_slugs = tuple(request.query_params.getlist("platform_slug"))
+    if post_id is None:
+        return render_page(
+            request,
+            "pages/results.html",
+            page_title="Results",
+            active_page="compose",
+            workflow_step="results",
+        )
+
+    session_factory = get_session_factory()
+    with session_factory() as db:
+        results_state = load_submission_results_state(
+            db,
+            post_id=post_id,
+            selected_platform_slugs=selected_platform_slugs,
+        )
+    if results_state is None:
+        raise HTTPException(status_code=404, detail="Master post not found.")
+
     return render_page(
         request,
         "pages/results.html",
         page_title="Results",
         active_page="compose",
         workflow_step="results",
+        results_post_summary=results_state.post_summary,
+        submission_results=results_state.results,
     )
 
 
@@ -485,6 +635,19 @@ def _build_review_final_url(
         platform_index=platform_index,
     )
     return f"{request.url_for('review_final')}?{urlencode(query_items, doseq=True)}"
+
+
+def _build_results_url(
+    request: Request,
+    *,
+    post_id: int,
+    selected_platform_slugs: tuple[str, ...],
+) -> str:
+    query_items = _build_workflow_query_items(
+        post_id=post_id,
+        selected_platform_slugs=selected_platform_slugs,
+    )
+    return f"{request.url_for('results')}?{urlencode(query_items, doseq=True)}"
 
 
 def _build_workflow_query_items(

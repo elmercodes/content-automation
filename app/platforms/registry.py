@@ -25,6 +25,23 @@ class PlatformPreviewSpec:
 
 
 @dataclass(frozen=True, slots=True)
+class PlatformPostingSpec:
+    enabled: bool
+    supports_single_image: bool
+    supports_image_carousel: bool
+    max_image_items: int
+    required_settings: tuple[str, ...] = ()
+    notes: str = ""
+
+    def missing_settings(self, settings: Settings) -> tuple[str, ...]:
+        return tuple(
+            setting_name
+            for setting_name in self.required_settings
+            if not getattr(settings, setting_name)
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class PlatformDefinition:
     slug: str
     display_name: str
@@ -34,6 +51,7 @@ class PlatformDefinition:
     allowed_media_types: tuple[str, ...]
     carousel_allowed_media_types: tuple[str, ...]
     preview_spec: PlatformPreviewSpec
+    posting_spec: PlatformPostingSpec
     caption_limit: int | None = None
     validation_notes: str = ""
 
@@ -62,6 +80,16 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
             canvas_height=1350,
             frame_label="4:5 feed preview",
         ),
+        posting_spec=PlatformPostingSpec(
+            enabled=False,
+            supports_single_image=False,
+            supports_image_carousel=False,
+            max_image_items=0,
+            notes=(
+                "Direct posting is deferred because the current local-only "
+                "workflow does not expose public media URLs for Meta publishing."
+            ),
+        ),
         caption_limit=2200,
         validation_notes="Configured visibility is based on a local access token.",
     ),
@@ -77,6 +105,13 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
             canvas_width=1200,
             canvas_height=1200,
             frame_label="Square feed preview",
+        ),
+        posting_spec=PlatformPostingSpec(
+            enabled=False,
+            supports_single_image=False,
+            supports_image_carousel=False,
+            max_image_items=0,
+            notes="Direct Facebook posting is deferred in the current workflow.",
         ),
         validation_notes=(
             "Configured visibility uses page ID presence as a lightweight check."
@@ -94,6 +129,22 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
             canvas_width=1600,
             canvas_height=900,
             frame_label="Wide timeline preview",
+        ),
+        posting_spec=PlatformPostingSpec(
+            enabled=True,
+            supports_single_image=True,
+            supports_image_carousel=True,
+            max_image_items=4,
+            required_settings=(
+                "x_api_key",
+                "x_api_secret",
+                "x_access_token",
+                "x_access_token_secret",
+            ),
+            notes=(
+                "Posting uses local OAuth 1.0a user credentials plus local image "
+                "uploads to X."
+            ),
         ),
         caption_limit=280,
         validation_notes="Configured visibility is based on a local API key.",
@@ -141,6 +192,15 @@ def serialize_platform(
             "frame_label": platform.preview_spec.frame_label,
             "background_hex": platform.preview_spec.background_hex,
             "aspect_ratio_label": platform.preview_spec.aspect_ratio_label,
+        },
+        "posting_spec": {
+            "enabled": platform.posting_spec.enabled,
+            "supports_single_image": platform.posting_spec.supports_single_image,
+            "supports_image_carousel": (platform.posting_spec.supports_image_carousel),
+            "max_image_items": platform.posting_spec.max_image_items,
+            "required_settings": platform.posting_spec.required_settings,
+            "missing_settings": platform.posting_spec.missing_settings(settings),
+            "notes": platform.posting_spec.notes,
         },
         "caption_limit": platform.caption_limit,
         "validation_notes": platform.validation_notes,

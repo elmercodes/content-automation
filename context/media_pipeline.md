@@ -32,8 +32,8 @@ the actual files live under `storage/`.
    without changing the saved upload.
 5. Preview normalization resizes proportionally, centers the image on a new
    platform-owned canvas, and avoids default cropping.
-6. Later posting workflows use the ordered media item set attached to the
-   master post.
+6. Phase 9 posting workflows use the ordered original media item set attached
+   to the master post rather than reusing generated preview artifacts.
 
 ## Phase 5 Upload Rules
 
@@ -59,6 +59,8 @@ the actual files live under `storage/`.
 ## Validation Boundaries
 
 - Validate media compatibility before posting.
+- Validate that the selected local source files still exist and are readable
+  before provider submission begins.
 - Keep platform-specific media limits out of templates.
 - Treat carousel rules as first-class validation rules, not as a special-case
   hack around single-media posting.

@@ -36,6 +36,9 @@ def isolated_local_runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> P
     monkeypatch.delenv("INSTAGRAM_ACCESS_TOKEN", raising=False)
     monkeypatch.delenv("FACEBOOK_PAGE_ID", raising=False)
     monkeypatch.delenv("X_API_KEY", raising=False)
+    monkeypatch.delenv("X_API_SECRET", raising=False)
+    monkeypatch.delenv("X_ACCESS_TOKEN", raising=False)
+    monkeypatch.delenv("X_ACCESS_TOKEN_SECRET", raising=False)
 
     get_settings.cache_clear()
     clear_db_runtime_caches()
@@ -76,6 +79,9 @@ def configure_platform_env(monkeypatch: pytest.MonkeyPatch):
             monkeypatch.setenv("X_API_KEY", "test-x-key")
         else:
             monkeypatch.delenv("X_API_KEY", raising=False)
+        monkeypatch.delenv("X_API_SECRET", raising=False)
+        monkeypatch.delenv("X_ACCESS_TOKEN", raising=False)
+        monkeypatch.delenv("X_ACCESS_TOKEN_SECRET", raising=False)
 
         get_settings.cache_clear()
         clear_db_runtime_caches()

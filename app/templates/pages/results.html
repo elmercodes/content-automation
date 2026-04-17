@@ -3,29 +3,108 @@
 {% block content %}
 <section class="page-intro">
   <p class="section-eyebrow">Results</p>
-  <h1>Post platform log placeholder</h1>
+  <h1>Submission results</h1>
   <p>
-    This route reserves the eventual results page where post platform logs will
-    summarize submission outcomes for each configured platform.
+    This page reads the latest saved post platform logs for one master post and
+    shows the normalized submission outcomes recorded during Phase 9.
   </p>
 </section>
 
+{% if results_post_summary %}
 <section class="card-grid">
-  <article class="card">
-    <h2>Planned outcome details</h2>
-    <ul class="feature-list">
-      <li>Per-platform status and error summaries</li>
-      <li>Timestamps for attempts and results</li>
-      <li>Links back to the originating master post context</li>
-    </ul>
+  <article class="card success-card">
+    <h2>Master post summary</h2>
+    <dl class="details compact-details">
+      <div>
+        <dt>Master post ID</dt>
+        <dd><code>{{ results_post_summary.id }}</code></dd>
+      </div>
+      <div>
+        <dt>Media items</dt>
+        <dd>{{ results_post_summary.media_count }}</dd>
+      </div>
+      <div>
+        <dt>Post format</dt>
+        <dd>
+          {% if results_post_summary.media_count > 1 %}
+          Image carousel
+          {% else %}
+          Single image
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
   </article>
 
   <article class="card">
-    <h2>Current behavior</h2>
+    <h2>Workflow navigation</h2>
     <p>
-      Phase 3 exposes only the route and layout. No post platform logs are
-      created yet.
+      Return to <a href="{{ request.url_for('compose') }}">Compose</a> to create
+      another master post, or revisit
+      <a href="{{ request.url_for('history') }}">History</a> in a later phase
+      once local browsing is implemented.
     </p>
   </article>
 </section>
+
+{% if submission_results %}
+<section class="card-grid">
+  {% for result in submission_results %}
+  <article class="card">
+    <h2>{{ result.platform_display_name }}</h2>
+    <dl class="details compact-details">
+      <div>
+        <dt>Status</dt>
+        <dd>{{ result.status | replace("_", " ") | title }}</dd>
+      </div>
+      <div>
+        <dt>Attempted at</dt>
+        <dd><code>{{ result.attempted_at.isoformat() }}</code></dd>
+      </div>
+      {% if result.posted_at %}
+      <div>
+        <dt>Posted at</dt>
+        <dd><code>{{ result.posted_at.isoformat() }}</code></dd>
+      </div>
+      {% endif %}
+      {% if result.external_post_id %}
+      <div>
+        <dt>External post ID</dt>
+        <dd><code>{{ result.external_post_id }}</code></dd>
+      </div>
+      {% endif %}
+      {% if result.error_message %}
+      <div>
+        <dt>Error</dt>
+        <dd>{{ result.error_message }}</dd>
+      </div>
+      {% endif %}
+      {% if result.response_summary %}
+      <div>
+        <dt>Response summary</dt>
+        <dd><code>{{ result.response_summary }}</code></dd>
+      </div>
+      {% endif %}
+    </dl>
+  </article>
+  {% endfor %}
+</section>
+{% else %}
+<section class="empty-state">
+  <h2>No saved results for this master post yet</h2>
+  <p>
+    Reach this page through the final review submission step so the app can
+    record per-platform outcomes in the local SQLite database first.
+  </p>
+</section>
+{% endif %}
+{% else %}
+<section class="empty-state">
+  <h2>Submit a reviewed post to see saved outcomes</h2>
+  <p>
+    This page shows the latest local post platform logs for one master post
+    after the final review submission step.
+  </p>
+</section>
+{% endif %}
 {% endblock %}

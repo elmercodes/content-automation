@@ -4,6 +4,12 @@ Notable repository changes are listed here in a short human-readable form.
 
 ## 2026-04-17
 
+- Completed Phase 9 with synchronous final-review submission, a real X posting
+  adapter, explicit unsupported outcomes for deferred providers, and a real
+  results page backed by post platform logs.
+- Added a small adapter contract, normalized post platform log statuses plus
+  response summaries, and automated coverage for submission success, failure
+  isolation, duplicate blocking, and results rendering.
 - Completed Phase 8 with ordered multi-image carousel review support in the
   server-rendered workflow.
 - Extended backend platform capability metadata for carousel-specific image

@@ -2,6 +2,7 @@
 
 from app.platforms.registry import (
     PlatformDefinition,
+    PlatformPostingSpec,
     PlatformPreviewSpec,
     get_configured_platform_context,
     get_configured_platforms,
@@ -13,6 +14,7 @@ from app.platforms.registry import (
 
 __all__ = [
     "PlatformDefinition",
+    "PlatformPostingSpec",
     "PlatformPreviewSpec",
     "get_configured_platform_context",
     "get_configured_platforms",

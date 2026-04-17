@@ -47,8 +47,17 @@ def test_platform_registry_exposes_image_only_carousel_rules_for_current_workflo
 ):
     instagram = get_platform("instagram")
     facebook = get_platform("facebook")
+    x_platform = get_platform("x")
 
     assert instagram.allowed_media_types == ("image",)
     assert instagram.carousel_allowed_media_types == ("image",)
     assert facebook.allowed_media_types == ("image",)
     assert facebook.carousel_allowed_media_types == ()
+    assert instagram.posting_spec.enabled is False
+    assert x_platform.posting_spec.enabled is True
+    assert x_platform.posting_spec.required_settings == (
+        "x_api_key",
+        "x_api_secret",
+        "x_access_token",
+        "x_access_token_secret",
+    )

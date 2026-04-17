@@ -14,7 +14,7 @@ from app.main import app
         ("/platforms", "Save a master post before choosing platforms"),
         ("/review/platforms", "Preview selected platforms"),
         ("/review/final", "Submission checkpoint"),
-        ("/results", "Post platform log placeholder"),
+        ("/results", "Submission results"),
         ("/history", "Local history placeholder"),
     ],
 )

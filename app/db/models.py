@@ -8,6 +8,7 @@ from sqlalchemy import (
     CheckConstraint,
     DateTime,
     ForeignKey,
+    Index,
     String,
     Text,
     UniqueConstraint,
@@ -18,7 +19,14 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.base import Base
 
 MEDIA_TYPES = ("image", "video")
-POST_PLATFORM_LOG_STATUSES = ("pending", "posted", "failed")
+POST_PLATFORM_LOG_STATUSES = (
+    "pending",
+    "posted",
+    "not_configured",
+    "unsupported",
+    "validation_failed",
+    "submission_failed",
+)
 
 
 def utcnow() -> datetime:
@@ -115,8 +123,21 @@ class PostPlatformLog(Base):
     __tablename__ = "post_platform_logs"
     __table_args__ = (
         CheckConstraint(
-            "status IN ('pending', 'posted', 'failed')",
+            "status IN ("
+            "'pending', "
+            "'posted', "
+            "'not_configured', "
+            "'unsupported', "
+            "'validation_failed', "
+            "'submission_failed'"
+            ")",
             name="status_allowed",
+        ),
+        Index(
+            "ix_post_platform_logs_post_id_platform_slug_created_at",
+            "post_id",
+            "platform_slug",
+            "created_at",
         ),
     )
 
@@ -137,5 +158,6 @@ class PostPlatformLog(Base):
     posted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     external_post_id: Mapped[str | None] = mapped_column(Text)
     error_message: Mapped[str | None] = mapped_column(Text)
+    response_summary: Mapped[str | None] = mapped_column(Text)
 
     post: Mapped[Post] = relationship(back_populates="post_platform_logs")

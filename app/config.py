@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     instagram_access_token: str | None = None
     facebook_page_id: str | None = None
     x_api_key: str | None = None
+    x_api_secret: str | None = None
+    x_access_token: str | None = None
+    x_access_token_secret: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

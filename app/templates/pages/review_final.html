@@ -5,9 +5,9 @@
   <p class="section-eyebrow">Final review</p>
   <h1>Submission checkpoint</h1>
   <p>
-    The preview engine has generated review output for the selected platforms.
-    This phase still stops before posting adapters, but the workflow handoff is
-    now preserved into the final server-rendered checkpoint.
+    The preview engine has generated review output for the selected platforms,
+    and this checkpoint now hands the selected master post into synchronous
+    local submission.
   </p>
 </section>
 
@@ -31,7 +31,7 @@
 {% if review_post_summary %}
 <section class="card-grid">
   <article class="card success-card">
-    <h2>Master post ready for later phases</h2>
+    <h2>Master post ready to submit</h2>
     <dl class="details compact-details">
       <div>
         <dt>Master post ID</dt>
@@ -88,6 +88,15 @@
           / unknown limit
           {% endif %}
         </span>
+        <span class="muted">
+          Posting readiness:
+          {% if item.posting_readiness.status == "ready" %}
+          Ready
+          {% else %}
+          {{ item.posting_readiness.status | replace("_", " ") | title }}
+          {% endif %}
+        </span>
+        <span class="muted">{{ item.posting_readiness.message }}</span>
       </li>
       {% endfor %}
     </ul>
@@ -96,25 +105,33 @@
 
 <section class="card-grid">
   <article class="card">
-    <h2>Phase 8 completion point</h2>
+    <h2>Submission behavior</h2>
     <p>
-      Generated preview files now exist locally under
-      <code>storage/generated/</code> for each ordered media item. Posting
-      adapters, post platform logs, and submission controls remain deferred to
-      later phases.
+      Submission runs synchronously in the current request, records one post
+      platform log per selected platform, and keeps later platform failures from
+      erasing earlier outcomes.
     </p>
   </article>
 
   <article class="card">
     <h2>Review navigation</h2>
-    <div class="button-row compact-button-row">
-      {% if review_platform_url %}
-      <a class="button-secondary" href="{{ review_platform_url }}">Back to previews</a>
-      {% endif %}
-      {% if platform_selection_url %}
-      <a class="button-secondary" href="{{ platform_selection_url }}">Back to platform selection</a>
-      {% endif %}
-    </div>
+    <form method="post" action="{{ submit_review_url }}">
+      <input type="hidden" name="post_id" value="{{ review_post_summary.id }}">
+      <input type="hidden" name="platform_index" value="{{ review_page.current_platform_index }}">
+      {% for platform in selected_platforms %}
+      <input type="hidden" name="platform_slug" value="{{ platform.slug }}">
+      {% endfor %}
+
+      <div class="button-row compact-button-row">
+        <button class="button-primary" type="submit">Submit to selected platforms</button>
+        {% if review_platform_url %}
+        <a class="button-secondary" href="{{ review_platform_url }}">Back to previews</a>
+        {% endif %}
+        {% if platform_selection_url %}
+        <a class="button-secondary" href="{{ platform_selection_url }}">Back to platform selection</a>
+        {% endif %}
+      </div>
+    </form>
   </article>
 </section>
 {% else %}

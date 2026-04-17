@@ -54,6 +54,8 @@ first, then follow the topic links that match the task.
   - ordered carousel support as a first-class concept
 - [`decisions/007_preview_artifacts_are_regenerable_local_derivatives.md`](decisions/007_preview_artifacts_are_regenerable_local_derivatives.md)
   - generated preview files as local regenerable derivatives
+- [`decisions/008_synchronous_adapter_submission_and_normalized_results.md`](decisions/008_synchronous_adapter_submission_and_normalized_results.md)
+  - small posting adapter contract and synchronous per-platform submission
 
 ## Task Routing
 

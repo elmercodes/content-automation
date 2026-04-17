@@ -11,7 +11,7 @@ capability rules, and credential expectations.
 - Centralize platform capabilities so validation and UI decisions share the same
   source of truth.
 
-## Phase 8 Baseline
+## Phase 9 Baseline
 
 - The registry lives in `app/platforms/registry.py`.
 - The supported platform set currently includes `instagram`, `facebook`, and
@@ -20,6 +20,10 @@ capability rules, and credential expectations.
 - Registry entries hold:
   - stable slug and display name
   - required settings fields for local visibility
+  - posting-spec metadata that separates direct submission support from simple
+    configured visibility, including whether direct posting is enabled, whether
+    single-image or image-carousel posting is supported, provider posting
+    credential requirements, and operator-facing notes
   - coarse capability metadata such as carousel support, maximum carousel size,
     single-media allowed media types, carousel-allowed media types, and broad
     caption limits
@@ -29,6 +33,8 @@ capability rules, and credential expectations.
     pages
 - `configured` means the platform is visible in the local UI because its
   required setting fields are present in `.env`.
+- `posting ready` means a provider adapter can attempt submission for that
+  platform after shared validation and provider-specific credential checks.
 - Phase 6 uses the registry for the first real workflow decision: the
   platform-selection page shows only configured platforms and then applies
   post-specific eligibility guardrails in backend service code before a
@@ -60,9 +66,9 @@ capability rules, and credential expectations.
   registry itself.
 - Preview file generation belongs in workflow service and normalization modules,
   not in the registry itself.
-- Provider-specific HTTP logic is deferred until the adapter phase.
-- Exact adapter credential rules, submission payload details, and final
-  validation behavior are deferred until later phases.
+- Provider-specific HTTP logic belongs in adapter modules, not in the registry.
+- The registry should expose posting capability and credential expectations,
+  but it should not build request payloads or perform network calls.
 - The current workflow remains image-only even where a future platform adapter
   may support video outside this phase.
 

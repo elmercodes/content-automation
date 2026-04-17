@@ -12,13 +12,16 @@ into an API-first or cloud-oriented system.
 - Local upload and image metadata helpers in `app/media_uploads.py`
 - Platform selection orchestration in `app/platform_selection_service.py`
 - Preview-state orchestration in `app/preview_service.py`
+- Posting orchestration in `app/posting_service.py`
 - Deterministic image normalization in `app/image_normalization.py`
 - SQLite persistence helpers and ORM models in `app/db/`
 - Platform registry in `app/platforms/registry.py`
+- Posting adapter contract in `app/platforms/adapters.py`
+- Real X posting adapter in `app/platforms/x_adapter.py`
 - Router entrypoint in `app/web/router.py`
 - Route modules under `app/web/routes/`
 - Generated-preview serving route in `app/web/routes/media.py`
-- Alembic migration layer with the first active schema revision
+- Alembic migration layer with active schema revisions for the current workflow
 
 ## Direction
 
@@ -28,8 +31,9 @@ into an API-first or cloud-oriented system.
 - Keep upload handling and media metadata extraction in backend modules instead
   of pushing file logic into routes or templates.
 - Add domain or service modules only when later phases introduce real workflow
-  complexity. Phase 7 now justifies dedicated preview and normalization modules,
-  but the repo should still avoid empty package trees.
+  complexity. Phases 7 and 9 now justify dedicated preview, normalization, and
+  posting orchestration modules, but the repo should still avoid empty package
+  trees.
 - Keep platform integrations behind clear backend boundaries instead of leaking
   provider logic into templates.
 
@@ -44,6 +48,9 @@ into an API-first or cloud-oriented system.
 - Preview engine: build one selected-platform review state at a time, combine
   caption plus hashtags for length visibility, and surface obvious warning
   states from registry metadata
+- Posting service: reload reviewed posts, derive per-platform posting requests,
+  perform shared pre-submit validation, submit each platform sequentially, and
+  persist normalized outcomes
 - Image normalization: preserve uploaded originals, generate derived preview
   images under `storage/generated/`, and avoid default cropping
 - Persistence runtime: obtain synchronous SQLAlchemy sessions from `app/db/`
@@ -55,8 +62,8 @@ into an API-first or cloud-oriented system.
 - Persistence layer: store master posts, media items, and post platform logs
 - Generated media route: serve only preview artifacts rooted under
   `settings.generated_path`
-- Adapter layer: defer until the posting phase and keep provider specifics out
-  of core workflow code
+- Adapter layer: keep provider-specific HTTP details and runtime validation out
+  of core workflow orchestration
 
 ## Avoid Early
 
