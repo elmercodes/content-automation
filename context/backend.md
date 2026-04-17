@@ -13,6 +13,7 @@ into an API-first or cloud-oriented system.
 - Platform selection orchestration in `app/platform_selection_service.py`
 - Preview-state orchestration in `app/preview_service.py`
 - Posting orchestration in `app/posting_service.py`
+- Read-side results/history state assembly in `app/history_service.py`
 - Deterministic image normalization in `app/image_normalization.py`
 - SQLite persistence helpers and ORM models in `app/db/`
 - Platform registry in `app/platforms/registry.py`
@@ -20,7 +21,8 @@ into an API-first or cloud-oriented system.
 - Real X posting adapter in `app/platforms/x_adapter.py`
 - Router entrypoint in `app/web/router.py`
 - Route modules under `app/web/routes/`
-- Generated-preview serving route in `app/web/routes/media.py`
+- Generated-preview and uploaded-media serving routes in
+  `app/web/routes/media.py`
 - Alembic migration layer with active schema revisions for the current workflow
 
 ## Direction
@@ -51,6 +53,9 @@ into an API-first or cloud-oriented system.
 - Posting service: reload reviewed posts, derive per-platform posting requests,
   perform shared pre-submit validation, submit each platform sequentially, and
   persist normalized outcomes
+- History service: load newest-first master post summaries, derive latest
+  platform outcomes per post, and assemble post-detail ledger views from saved
+  media items plus post platform logs
 - Image normalization: preserve uploaded originals, generate derived preview
   images under `storage/generated/`, and avoid default cropping
 - Persistence runtime: obtain synchronous SQLAlchemy sessions from `app/db/`
@@ -62,6 +67,9 @@ into an API-first or cloud-oriented system.
 - Persistence layer: store master posts, media items, and post platform logs
 - Generated media route: serve only preview artifacts rooted under
   `settings.generated_path`
+- Uploaded media route: serve only saved uploads rooted under
+  `settings.uploads_path` so history pages can render local thumbnails without
+  mounting all of `storage/`
 - Adapter layer: keep provider-specific HTTP details and runtime validation out
   of core workflow orchestration
 

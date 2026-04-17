@@ -18,6 +18,10 @@ JavaScript application shell.
   for image carousels without client-side interactivity
 - The final review step now preserves selected-platform workflow context on
   `pages/review_final.html`
+- Real results and history pages now live on `pages/results.html`,
+  `pages/history.html`, and `pages/history_detail.html`
+- Shared latest-outcome and status partials now live under
+  `app/templates/partials/`
 
 ## Direction
 
@@ -44,6 +48,8 @@ JavaScript application shell.
   provider interfaces.
 - Prefer simple ordered lists, thumbnail-like frames, and explicit item counts
   for carousel review instead of interactive gallery controls.
+- Prefer compact cards, ordered media lists, and status badges for results and
+  history rather than dense data tables or client-side widgets.
 
 ## No-JS Boundary
 
@@ -58,6 +64,9 @@ JavaScript application shell.
 - Keep preview rendering backend-owned. Generated preview images should be
   requested from a backend route, not by mounting the storage directory as a
   public static tree.
+- Keep history media rendering backend-owned. Uploaded originals should be
+  requested through a narrow backend route rather than by exposing
+  `storage/uploads/` directly.
 
 ## Related Docs
 

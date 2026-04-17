@@ -1,7 +1,7 @@
 # Implementation Tracker
 
 Status legend: Not Started | In Progress | Completed
-Current phase: Phase 10 - Results and post history
+Current phase: Phase 11 - Testing, polish, and shareability
 
 | Phase | Status | Summary |
 | --- | --- | --- |
@@ -14,8 +14,8 @@ Current phase: Phase 10 - Results and post history
 | 7. Preview engine and image normalization | Completed | Generate platform-aware previews and normalize media |
 | 8. Carousel support | Completed | Support ordered multi-image posts and validations |
 | 9. Platform adapters and posting | Completed | Added synchronous provider submission, normalized post platform logs, a real X adapter, and results rendering |
-| 10. Results and post history | In Progress | Record outcomes and expose local history views |
-| 11. Testing, polish, and shareability | Not Started | Improve coverage, docs, packaging, and local usability |
+| 10. Results and post history | Completed | Added persistent history index/detail views, shared results/history presentation, and uploaded-media serving for local ledger pages |
+| 11. Testing, polish, and shareability | In Progress | Improve coverage, docs, packaging, and local usability |
 
 ## Update Rules
 
@@ -53,4 +53,7 @@ Current phase: Phase 10 - Results and post history
 - 2026-04-17: Phase 9 completed with synchronous final-review submission,
   normalized post platform log statuses, a real X posting adapter, explicit
   unsupported outcomes for deferred providers, and a real results page.
-  Phase 10 is now in progress.
+- 2026-04-17: Phase 10 completed with a dedicated read-side history service,
+  real `/history` and `/history/{post_id}` pages, shared latest-outcome
+  presentation across results and history, and safe backend serving for
+  uploaded media thumbnails. Phase 11 is now in progress.

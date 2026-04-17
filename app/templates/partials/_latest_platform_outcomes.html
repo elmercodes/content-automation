@@ -1,0 +1,30 @@
+{% if outcomes %}
+<ul class="platform-outcome-list">
+  {% for outcome in outcomes %}
+  <li class="platform-outcome-item">
+    <div class="platform-outcome-header">
+      <strong>{{ outcome.platform_display_name }}</strong>
+      {% with status_item=outcome %}
+      {% include "partials/_status_badge.html" %}
+      {% endwith %}
+    </div>
+    {% if show_attempted_time %}
+    <p class="muted">
+      Latest attempt:
+      <time datetime="{{ outcome.attempted_at.isoformat() }}">{{ outcome.attempted_at.isoformat() }}</time>
+    </p>
+    {% endif %}
+    {% if outcome.external_post_id %}
+    <p class="muted">
+      External post ID: <code>{{ outcome.external_post_id }}</code>
+    </p>
+    {% endif %}
+    {% if outcome.error_message %}
+    <p class="muted">{{ outcome.error_message }}</p>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="muted">{{ empty_message }}</p>
+{% endif %}

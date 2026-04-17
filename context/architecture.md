@@ -19,8 +19,9 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
 - `app/preview_service.py` owns preview-state assembly, text-length
   visibility, and warning generation for the review step.
 - `app/posting_service.py` owns final-review posting readiness, synchronous
-  per-platform submission orchestration, post platform log persistence, and
-  results-state loading.
+  per-platform submission orchestration, and post platform log persistence.
+- `app/history_service.py` owns read-side results and history state assembly on
+  top of saved posts, media items, and post platform logs.
 - `app/image_normalization.py` owns deterministic image normalization and
   generated preview file creation under local storage.
 - `app/db/` owns the SQLite local database models, engine/session helpers, and
@@ -33,11 +34,12 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
   provider integration.
 - `app/web/router.py` and `app/web/routes/` define the server-rendered route
   shell for home, compose, platform review, results, and history pages.
-- `app/web/routes/media.py` serves generated preview files through a narrow
-  backend-owned route instead of exposing the full `storage/` tree.
+- `app/web/routes/media.py` serves generated preview files plus uploaded media
+  originals through narrow backend-owned routes instead of exposing the full
+  `storage/` tree.
 - `app/templates/` now includes a shared base layout, workflow partials, and
-  real preview, final-review, and results pages for the server-rendered
-  workflow.
+  real preview, final-review, results, history index, and history detail pages
+  for the server-rendered workflow.
 - `alembic/` owns the migration layer and is wired to the SQLAlchemy metadata.
 
 ## Runtime Boundaries
@@ -60,10 +62,14 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
 - SQLite: durable app state
 - Local filesystem: uploads, generated media, and the SQLite file itself
 - Generated preview route: backend-owned file serving for preview artifacts
+- Uploaded media route: backend-owned file serving for original local uploads
+  reused in history views
 - Posting adapter layer: per-platform runtime validation and provider HTTP
   submission behind a small backend-owned contract
 - Submission orchestration: synchronous, sequential final-review posting with
   one durable post platform log per selected platform attempt
+- History read side: newest-first post listing plus per-post outcome summaries
+  built from saved media items and platform logs
 
 ## Intended Flow
 
@@ -73,9 +79,11 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
    workflow logic.
 3. Persistent data is stored in SQLite while uploaded originals and generated
    preview files remain on local disk.
-4. The backend renders the next HTML response, serves generated preview media,
-   submits selected platforms synchronously when final review is posted, and
-   redirects with PRG into the saved results step.
+4. The backend renders the next HTML response, serves generated preview media
+   and uploaded originals through narrow routes, submits selected platforms
+   synchronously when final review is posted, redirects with PRG into the saved
+   results step, and exposes longer-lived history pages from SQLite-backed
+   read-side state.
 
 ## Structural Rules
 

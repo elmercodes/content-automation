@@ -15,7 +15,7 @@ from app.main import app
         ("/review/platforms", "Preview selected platforms"),
         ("/review/final", "Submission checkpoint"),
         ("/results", "Submission results"),
-        ("/history", "Local history placeholder"),
+        ("/history", "Local content ledger"),
     ],
 )
 async def test_workflow_pages_render(path: str, expected_text: str) -> None:

@@ -4,6 +4,13 @@ Notable repository changes are listed here in a short human-readable form.
 
 ## 2026-04-17
 
+- Completed Phase 10 with a real local history ledger: newest-first history
+  index, per-post detail pages, shared results/history outcome presentation,
+  and safe uploaded-media rendering through backend-owned routes.
+- Split read-side results and history state assembly into `app/history_service.py`
+  so posting orchestration stays focused on submission and log persistence.
+- Added automated coverage for history queries, history/detail page rendering,
+  results-to-history navigation, and safe uploaded-media serving.
 - Completed Phase 9 with synchronous final-review submission, a real X posting
   adapter, explicit unsupported outcomes for deferred providers, and a real
   results page backed by post platform logs.

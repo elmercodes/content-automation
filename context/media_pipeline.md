@@ -12,6 +12,8 @@ the actual files live under `storage/`.
 - Phase 5 currently accepts image uploads only: JPG, PNG, and WEBP.
 - Phase 7 stores generated preview files under
   `storage/generated/previews/v1/posts/<post_id>/<platform_slug>/media-<display_order>.png`.
+- Phase 10 exposes uploaded originals through a narrow backend route so history
+  pages can render local thumbnails without mounting all of `storage/`.
 
 ## Direction
 
@@ -34,6 +36,8 @@ the actual files live under `storage/`.
    platform-owned canvas, and avoids default cropping.
 6. Phase 9 posting workflows use the ordered original media item set attached
    to the master post rather than reusing generated preview artifacts.
+7. Phase 10 history views reuse the saved original uploads for thumbnail-style
+   rendering and degrade gracefully when a local file is missing.
 
 ## Phase 5 Upload Rules
 

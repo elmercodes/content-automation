@@ -17,13 +17,41 @@ router = APIRouter()
 )
 async def generated_media(preview_path: str) -> FileResponse:
     settings = get_settings()
-    generated_root = settings.generated_path.resolve()
-    requested_path = (generated_root / Path(preview_path)).resolve()
+    requested_path = _resolve_local_media_path(
+        root_path=settings.generated_path.resolve(),
+        relative_path=preview_path,
+        not_found_detail="Generated preview not found.",
+    )
+    return FileResponse(requested_path)
 
-    if not requested_path.is_relative_to(generated_root):
-        raise HTTPException(status_code=404, detail="Generated preview not found.")
+
+@router.get(
+    "/media/uploads/{upload_path:path}",
+    name="uploaded_media",
+    response_class=FileResponse,
+)
+async def uploaded_media(upload_path: str) -> FileResponse:
+    settings = get_settings()
+    requested_path = _resolve_local_media_path(
+        root_path=settings.uploads_path.resolve(),
+        relative_path=upload_path,
+        not_found_detail="Uploaded media not found.",
+    )
+    return FileResponse(requested_path)
+
+
+def _resolve_local_media_path(
+    *,
+    root_path: Path,
+    relative_path: str,
+    not_found_detail: str,
+) -> Path:
+    requested_path = (root_path / Path(relative_path)).resolve()
+
+    if not requested_path.is_relative_to(root_path):
+        raise HTTPException(status_code=404, detail=not_found_detail)
 
     if not requested_path.is_file():
-        raise HTTPException(status_code=404, detail="Generated preview not found.")
+        raise HTTPException(status_code=404, detail=not_found_detail)
 
-    return FileResponse(requested_path)
+    return requested_path

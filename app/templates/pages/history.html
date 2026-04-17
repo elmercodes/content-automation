@@ -3,29 +3,73 @@
 {% block content %}
 <section class="page-intro">
   <p class="section-eyebrow">History</p>
-  <h1>Local history placeholder</h1>
+  <h1>Local content ledger</h1>
   <p>
-    Later phases will list master posts, media items, and post platform logs
-    stored in local SQLite.
+    Browse saved master posts from the local SQLite database, including ordered
+    media items and the latest normalized outcomes recorded for each platform.
   </p>
 </section>
 
-<section class="card-grid">
-  <article class="card">
-    <h2>Future history views</h2>
-    <ul class="feature-list">
-      <li>Recent master posts with shared caption details</li>
-      <li>Attached media items in preserved order</li>
-      <li>Per-platform outcomes grouped by post platform logs</li>
-    </ul>
-  </article>
+{% if history_state and history_state.has_posts %}
+<section class="history-post-list">
+  {% for item in history_posts %}
+  <article class="card history-post-card">
+    <div class="history-post-header">
+      <div>
+        <h2><a href="{{ item.detail_url }}">Master post {{ item.post.post_id }}</a></h2>
+        <p class="muted">
+          Created
+          <time datetime="{{ item.post.created_at.isoformat() }}">{{ item.post.created_at.isoformat() }}</time>
+        </p>
+      </div>
+      <p class="muted">{{ item.post.format_label }}</p>
+    </div>
 
-  <article class="card">
-    <h2>Phase 3 boundary</h2>
-    <p>
-      The route exists now so the app shell is stable before Phase 4 adds real
-      persistence.
-    </p>
+    <div class="history-post-summary">
+      {% if item.first_media_image_url %}
+      <img
+        class="history-list-thumbnail"
+        src="{{ item.first_media_image_url }}"
+        alt="First media item for master post {{ item.post.post_id }}"
+      >
+      {% elif item.post.first_media_item %}
+      <div class="history-list-thumbnail history-media-placeholder">No local image</div>
+      {% endif %}
+
+      <div class="history-post-copy">
+        <p><strong>{{ item.post.caption_summary }}</strong></p>
+        <p class="muted">{{ item.post.media_count }} media items</p>
+        {% if item.post.latest_activity_at %}
+        <p class="muted">
+          Latest platform activity:
+          <time datetime="{{ item.post.latest_activity_at.isoformat() }}">{{ item.post.latest_activity_at.isoformat() }}</time>
+        </p>
+        {% else %}
+        <p class="muted">No platform attempts yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <section>
+      <h3>Latest outcomes</h3>
+      {% with outcomes=item.post.latest_outcomes, empty_message="No platform outcomes saved yet.", show_attempted_time=False %}
+      {% include "partials/_latest_platform_outcomes.html" %}
+      {% endwith %}
+    </section>
+
+    <div class="button-row compact-button-row">
+      <a class="button-secondary" href="{{ item.detail_url }}">View details</a>
+    </div>
   </article>
+  {% endfor %}
 </section>
+{% else %}
+<section class="empty-state">
+  <h2>No saved posts yet</h2>
+  <p>
+    Start with <a href="{{ request.url_for('compose') }}">Compose</a> to create
+    the first local master post in the ledger.
+  </p>
+</section>
+{% endif %}
 {% endblock %}

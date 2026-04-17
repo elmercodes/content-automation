@@ -6,7 +6,8 @@
   <h1>Submission results</h1>
   <p>
     This page reads the latest saved post platform logs for one master post and
-    shows the normalized submission outcomes recorded during Phase 9.
+    shows the normalized submission outcomes recorded during Phase 9, with a
+    direct handoff into the longer-lived local history ledger.
   </p>
 </section>
 
@@ -26,68 +27,63 @@
       <div>
         <dt>Post format</dt>
         <dd>
-          {% if results_post_summary.media_count > 1 %}
-          Image carousel
-          {% else %}
-          Single image
-          {% endif %}
+          {% if results_post_summary.media_count > 1 %}Image carousel{% else %}Single image{% endif %}
         </dd>
       </div>
     </dl>
   </article>
 
   <article class="card">
-    <h2>Workflow navigation</h2>
-    <p>
-      Return to <a href="{{ request.url_for('compose') }}">Compose</a> to create
-      another master post, or revisit
-      <a href="{{ request.url_for('history') }}">History</a> in a later phase
-      once local browsing is implemented.
-    </p>
+    <h2>Next steps</h2>
+    <div class="button-row compact-button-row">
+      <a class="button-secondary" href="{{ history_detail_url }}">View history entry</a>
+      <a class="button-secondary" href="{{ history_index_url }}">View all history</a>
+      <a class="button-secondary" href="{{ request.url_for('compose') }}">Create another post</a>
+    </div>
   </article>
 </section>
 
-{% if submission_results %}
-<section class="card-grid">
-  {% for result in submission_results %}
-  <article class="card">
-    <h2>{{ result.platform_display_name }}</h2>
-    <dl class="details compact-details">
-      <div>
-        <dt>Status</dt>
-        <dd>{{ result.status | replace("_", " ") | title }}</dd>
-      </div>
-      <div>
-        <dt>Attempted at</dt>
-        <dd><code>{{ result.attempted_at.isoformat() }}</code></dd>
-      </div>
-      {% if result.posted_at %}
-      <div>
-        <dt>Posted at</dt>
-        <dd><code>{{ result.posted_at.isoformat() }}</code></dd>
-      </div>
-      {% endif %}
-      {% if result.external_post_id %}
-      <div>
-        <dt>External post ID</dt>
-        <dd><code>{{ result.external_post_id }}</code></dd>
-      </div>
-      {% endif %}
-      {% if result.error_message %}
-      <div>
-        <dt>Error</dt>
-        <dd>{{ result.error_message }}</dd>
-      </div>
-      {% endif %}
-      {% if result.response_summary %}
-      <div>
-        <dt>Response summary</dt>
-        <dd><code>{{ result.response_summary }}</code></dd>
-      </div>
-      {% endif %}
-    </dl>
+{% if latest_outcomes %}
+<section class="card-grid preview-layout">
+  <article class="card preview-card">
+    <h2>Latest platform outcomes</h2>
+    {% with outcomes=latest_outcomes, empty_message="No platform outcomes were recorded for this post yet.", show_attempted_time=True %}
+    {% include "partials/_latest_platform_outcomes.html" %}
+    {% endwith %}
   </article>
-  {% endfor %}
+
+  <article class="card">
+    <h2>Attached media</h2>
+    {% if results_media_items %}
+    <ol class="history-media-list">
+      {% for media_item in results_media_items %}
+      <li class="history-media-item">
+        {% if media_item.upload_image_url %}
+        <img
+          class="history-media-thumbnail"
+          src="{{ media_item.upload_image_url }}"
+          alt="Uploaded media item {{ media_item.item_number }} for master post {{ results_post_summary.id }}"
+        >
+        {% else %}
+        <div class="history-media-placeholder">No local image</div>
+        {% endif %}
+        <div>
+          <strong>Item {{ media_item.item_number }}</strong>
+          <p class="muted">
+            {{ media_item.media_item.label }}
+            {% if media_item.media_item.width and media_item.media_item.height %}
+            · {{ media_item.media_item.width }} × {{ media_item.media_item.height }}
+            {% endif %}
+          </p>
+          {% if media_item.media_item.file_missing %}
+          <p class="muted">Local uploaded file is missing.</p>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    {% endif %}
+  </article>
 </section>
 {% else %}
 <section class="empty-state">
@@ -103,7 +99,8 @@
   <h2>Submit a reviewed post to see saved outcomes</h2>
   <p>
     This page shows the latest local post platform logs for one master post
-    after the final review submission step.
+    after the final review submission step, then links into the permanent
+    history views.
   </p>
 </section>
 {% endif %}

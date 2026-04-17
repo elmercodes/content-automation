@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-intro">
+  <p class="section-eyebrow">History detail</p>
+  <h1>Master post {{ history_post_state.post_summary.id }}</h1>
+  <p>
+    Inspect the full local record for this master post, including ordered media
+    items and every saved platform submission attempt.
+  </p>
+</section>
+
+<section class="card-grid">
+  <article class="card success-card">
+    <h2>Master post summary</h2>
+    <dl class="details compact-details">
+      <div>
+        <dt>Created at</dt>
+        <dd><time datetime="{{ history_post_state.created_at.isoformat() }}">{{ history_post_state.created_at.isoformat() }}</time></dd>
+      </div>
+      <div>
+        <dt>Media items</dt>
+        <dd>{{ history_post_state.post_summary.media_count }}</dd>
+      </div>
+      <div>
+        <dt>Post format</dt>
+        <dd>
+          {% if history_post_state.post_summary.media_count > 1 %}
+          Image carousel
+          {% else %}
+          Single image
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+  </article>
+
+  <article class="card">
+    <h2>Navigation</h2>
+    <div class="button-row compact-button-row">
+      <a class="button-secondary" href="{{ history_index_url }}">Back to history</a>
+      <a class="button-secondary" href="{{ compose_url }}">Create another post</a>
+    </div>
+  </article>
+</section>
+
+<section class="card-grid preview-layout">
+  <article class="card preview-card">
+    <h2>Ordered media items</h2>
+    {% if history_media_items %}
+    <ol class="history-media-list">
+      {% for media_item in history_media_items %}
+      <li class="history-media-item">
+        {% if media_item.upload_image_url %}
+        <img
+          class="history-media-thumbnail"
+          src="{{ media_item.upload_image_url }}"
+          alt="Uploaded media item {{ media_item.item_number }} for master post {{ history_post_state.post_summary.id }}"
+        >
+        {% else %}
+        <div class="history-media-placeholder">No local image</div>
+        {% endif %}
+
+        <div>
+          <strong>Item {{ media_item.item_number }}</strong>
+          <p class="muted">
+            {{ media_item.media_item.label }}
+            {% if media_item.media_item.width and media_item.media_item.height %}
+            · {{ media_item.media_item.width }} × {{ media_item.media_item.height }}
+            {% endif %}
+          </p>
+          <p class="muted">{{ media_item.media_item.media_type }}</p>
+          {% if media_item.media_item.file_missing %}
+          <p class="muted">Local uploaded file is missing.</p>
+          {% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+    {% endif %}
+  </article>
+
+  <article class="card">
+    <h2>Text content</h2>
+    <dl class="details compact-details">
+      <div>
+        <dt>Caption</dt>
+        <dd>
+          {% if history_post_state.post_summary.caption %}
+          {{ history_post_state.post_summary.caption }}
+          {% else %}
+          No caption saved yet
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Hashtags</dt>
+        <dd>
+          {% if history_post_state.post_summary.hashtags %}
+          {{ history_post_state.post_summary.hashtags }}
+          {% else %}
+          No hashtags saved yet
+          {% endif %}
+        </dd>
+      </div>
+    </dl>
+  </article>
+
+  <article class="card">
+    <h2>Latest platform outcomes</h2>
+    {% with outcomes=history_post_state.latest_outcomes, empty_message="No platform outcomes saved yet.", show_attempted_time=True %}
+    {% include "partials/_latest_platform_outcomes.html" %}
+    {% endwith %}
+  </article>
+</section>
+
+<section class="card">
+  <h2>Posting attempt history</h2>
+  {% if history_post_state.has_attempts %}
+  <ol class="attempt-history-list">
+    {% for attempt in history_post_state.attempt_history %}
+    <li class="attempt-history-item">
+      <div class="platform-outcome-header">
+        <strong>{{ attempt.platform_display_name }}</strong>
+        {% with status_item=attempt %}
+        {% include "partials/_status_badge.html" %}
+        {% endwith %}
+      </div>
+
+      <dl class="details compact-details">
+        <div>
+          <dt>Attempted at</dt>
+          <dd><time datetime="{{ attempt.attempted_at.isoformat() }}">{{ attempt.attempted_at.isoformat() }}</time></dd>
+        </div>
+        {% if attempt.posted_at %}
+        <div>
+          <dt>Posted at</dt>
+          <dd><time datetime="{{ attempt.posted_at.isoformat() }}">{{ attempt.posted_at.isoformat() }}</time></dd>
+        </div>
+        {% endif %}
+        {% if attempt.external_post_id %}
+        <div>
+          <dt>External post ID</dt>
+          <dd><code>{{ attempt.external_post_id }}</code></dd>
+        </div>
+        {% endif %}
+        {% if attempt.error_message %}
+        <div>
+          <dt>Error</dt>
+          <dd>{{ attempt.error_message }}</dd>
+        </div>
+        {% endif %}
+        {% if attempt.response_summary %}
+        <div>
+          <dt>Response summary</dt>
+          <dd><code>{{ attempt.response_summary }}</code></dd>
+        </div>
+        {% endif %}
+      </dl>
+    </li>
+    {% endfor %}
+  </ol>
+  {% else %}
+  <p class="muted">No platform submission attempts have been saved for this post yet.</p>
+  {% endif %}
+</section>
+{% endblock %}

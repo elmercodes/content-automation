@@ -4,12 +4,18 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
+from sqlalchemy.exc import OperationalError
 
 from app.compose_service import (
     build_compose_page_context,
     create_master_post,
 )
 from app.db import get_session_factory
+from app.history_service import (
+    load_history_index_state,
+    load_post_history_state,
+    load_results_page_state,
+)
 from app.platform_selection_service import (
     build_platform_review_state,
     build_platform_selection_page_context,
@@ -20,7 +26,6 @@ from app.platform_selection_service import (
 from app.posting_service import (
     DuplicateSubmissionError,
     build_posting_readiness_summaries,
-    load_submission_results_state,
     submit_reviewed_post,
 )
 from app.preview_service import (
@@ -565,13 +570,32 @@ async def results(request: Request, post_id: int | None = None) -> HTMLResponse:
 
     session_factory = get_session_factory()
     with session_factory() as db:
-        results_state = load_submission_results_state(
+        results_state = load_results_page_state(
             db,
             post_id=post_id,
             selected_platform_slugs=selected_platform_slugs,
         )
     if results_state is None:
         raise HTTPException(status_code=404, detail="Master post not found.")
+
+    result_media_items = tuple(
+        {
+            "item_number": media_item.display_order + 1,
+            "media_item": media_item,
+            "upload_image_url": (
+                str(
+                    request.url_for(
+                        "uploaded_media",
+                        upload_path=media_item.upload_relative_path,
+                    )
+                )
+                if media_item.upload_relative_path is not None
+                and not media_item.file_missing
+                else None
+            ),
+        }
+        for media_item in results_state.media_items
+    )
 
     return render_page(
         request,
@@ -580,17 +604,100 @@ async def results(request: Request, post_id: int | None = None) -> HTMLResponse:
         active_page="compose",
         workflow_step="results",
         results_post_summary=results_state.post_summary,
-        submission_results=results_state.results,
+        results_media_items=result_media_items,
+        latest_outcomes=results_state.latest_outcomes,
+        history_index_url=str(request.url_for("history")),
+        history_detail_url=str(
+            request.url_for(
+                "history_post",
+                post_id=results_state.post_summary.id,
+            )
+        ),
     )
 
 
 @router.get("/history", name="history", response_class=HTMLResponse)
 async def history(request: Request) -> HTMLResponse:
+    history_state = None
+    session_factory = get_session_factory()
+    try:
+        with session_factory() as db:
+            history_state = load_history_index_state(db)
+    except OperationalError:
+        history_state = None
+
+    history_posts = (
+        tuple(
+            {
+                "post": post,
+                "detail_url": str(
+                    request.url_for("history_post", post_id=post.post_id)
+                ),
+                "first_media_image_url": (
+                    str(
+                        request.url_for(
+                            "uploaded_media",
+                            upload_path=post.first_media_item.upload_relative_path,
+                        )
+                    )
+                    if post.first_media_item is not None
+                    and post.first_media_item.upload_relative_path is not None
+                    and not post.first_media_item.file_missing
+                    else None
+                ),
+            }
+            for post in history_state.posts
+        )
+        if history_state is not None
+        else ()
+    )
+
     return render_page(
         request,
         "pages/history.html",
         page_title="History",
         active_page="history",
+        history_posts=history_posts,
+        history_state=history_state,
+    )
+
+
+@router.get("/history/{post_id}", name="history_post", response_class=HTMLResponse)
+async def history_post(request: Request, post_id: int) -> HTMLResponse:
+    session_factory = get_session_factory()
+    with session_factory() as db:
+        post_history_state = load_post_history_state(db, post_id=post_id)
+    if post_history_state is None:
+        raise HTTPException(status_code=404, detail="Master post not found.")
+
+    history_media_items = tuple(
+        {
+            "item_number": media_item.display_order + 1,
+            "media_item": media_item,
+            "upload_image_url": (
+                str(
+                    request.url_for(
+                        "uploaded_media",
+                        upload_path=media_item.upload_relative_path,
+                    )
+                )
+                if media_item.upload_relative_path is not None
+                and not media_item.file_missing
+                else None
+            ),
+        }
+        for media_item in post_history_state.media_items
+    )
+
+    return render_page(
+        request,
+        "pages/history_detail.html",
+        page_title="History Detail",
+        active_page="history",
+        history_post_state=post_history_state,
+        history_media_items=history_media_items,
+        history_index_url=str(request.url_for("history")),
+        compose_url=str(request.url_for("compose")),
     )
 
 

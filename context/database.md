@@ -40,8 +40,9 @@ post platform logs.
   `instagram`, `facebook`, or `x`.
 - `file_path` stores a path relative to the local `storage/` root rather than
   an absolute machine path.
-- Later results and history views should read the latest post platform log per
-  platform rather than introducing a second Phase 9 batch table.
+- Phase 10 results and history views read the latest post platform log per
+  platform plus the full attempt history for a post rather than introducing a
+  second batch table.
 
 ## Runtime Rules
 

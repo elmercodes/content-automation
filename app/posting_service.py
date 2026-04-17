@@ -1,4 +1,4 @@
-"""Posting orchestration, per-platform logging, and results loading."""
+"""Posting orchestration and per-platform logging."""
 
 from __future__ import annotations
 
@@ -8,15 +8,13 @@ from pathlib import Path
 from typing import Callable
 
 from sqlalchemy import select
-from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
-from app.db import Post, PostPlatformLog
+from app.db import PostPlatformLog
 from app.platform_selection_service import (
     PlatformChoice,
     PlatformReviewState,
-    WorkflowMasterPostSummary,
-    WorkflowMediaItemSummary,
 )
 from app.platforms import get_platform
 from app.platforms.adapters import (
@@ -38,28 +36,6 @@ class PostingReadinessSummary:
     @property
     def is_ready(self) -> bool:
         return self.status == "ready"
-
-
-@dataclass(frozen=True, slots=True)
-class SubmissionResultSummary:
-    platform_slug: str
-    platform_display_name: str
-    status: str
-    attempted_at: datetime
-    posted_at: datetime | None
-    external_post_id: str | None
-    error_message: str | None
-    response_summary: str | None
-
-
-@dataclass(frozen=True, slots=True)
-class SubmissionResultsPageState:
-    post_summary: WorkflowMasterPostSummary
-    results: tuple[SubmissionResultSummary, ...]
-
-    @property
-    def has_results(self) -> bool:
-        return bool(self.results)
 
 
 class DuplicateSubmissionError(ValueError):
@@ -195,61 +171,6 @@ def submit_reviewed_post(
         results.append(result)
 
     return tuple(results)
-
-
-def load_submission_results_state(
-    session: Session,
-    *,
-    post_id: int,
-    selected_platform_slugs: tuple[str, ...] = (),
-) -> SubmissionResultsPageState | None:
-    post = session.scalar(
-        select(Post)
-        .options(
-            selectinload(Post.media_items),
-            selectinload(Post.post_platform_logs),
-        )
-        .where(Post.id == post_id)
-    )
-    if post is None:
-        return None
-
-    ordered_platform_slugs = (
-        tuple(dict.fromkeys(selected_platform_slugs))
-        if selected_platform_slugs
-        else tuple(dict.fromkeys(log.platform_slug for log in post.post_platform_logs))
-    )
-    selected_lookup = set(ordered_platform_slugs)
-    latest_logs: dict[str, PostPlatformLog] = {}
-    for log in post.post_platform_logs:
-        if selected_lookup and log.platform_slug not in selected_lookup:
-            continue
-        current = latest_logs.get(log.platform_slug)
-        if current is None or (
-            log.created_at,
-            log.id,
-        ) > (current.created_at, current.id):
-            latest_logs[log.platform_slug] = log
-
-    results = tuple(
-        SubmissionResultSummary(
-            platform_slug=platform_slug,
-            platform_display_name=_get_platform_display_name(platform_slug),
-            status=log.status,
-            attempted_at=log.created_at,
-            posted_at=log.posted_at,
-            external_post_id=log.external_post_id,
-            error_message=log.error_message,
-            response_summary=log.response_summary,
-        )
-        for platform_slug in ordered_platform_slugs
-        if (log := latest_logs.get(platform_slug)) is not None
-    )
-
-    return SubmissionResultsPageState(
-        post_summary=_build_workflow_post_summary(post),
-        results=results,
-    )
 
 
 def _submit_one_platform(
@@ -389,32 +310,6 @@ def _apply_posting_result(log: PostPlatformLog, result: PostingResult) -> None:
     log.external_post_id = result.external_post_id
     log.error_message = result.error_message
     log.response_summary = result.response_summary
-
-
-def _build_workflow_post_summary(post: Post) -> WorkflowMasterPostSummary:
-    return WorkflowMasterPostSummary(
-        id=post.id,
-        caption=post.caption,
-        hashtags=post.hashtags,
-        media_items=tuple(
-            WorkflowMediaItemSummary(
-                display_order=media_item.display_order,
-                original_filename=media_item.original_filename,
-                media_type=media_item.media_type,
-                width=media_item.width,
-                height=media_item.height,
-                file_path=media_item.file_path,
-            )
-            for media_item in post.media_items
-        ),
-    )
-
-
-def _get_platform_display_name(platform_slug: str) -> str:
-    try:
-        return get_platform(platform_slug).display_name
-    except KeyError:
-        return platform_slug
 
 
 def _is_readable_file(path: Path) -> bool:

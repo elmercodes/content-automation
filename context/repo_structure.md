@@ -17,8 +17,9 @@ top-level directories without a clear reason.
   lightweight workflow eligibility, and handoff helpers
 - `app/preview_service.py` - preview-state assembly and warning generation for
   the review step
-- `app/posting_service.py` - final-review submission orchestration, results
-  loading, and post platform log updates
+- `app/posting_service.py` - final-review submission orchestration and post
+  platform log updates
+- `app/history_service.py` - read-side results and history state assembly
 - `app/platforms/` - platform registry metadata, posting adapter types, and
   provider implementations
 - `app/platforms/adapters.py` - shared posting request/result types plus
@@ -26,7 +27,8 @@ top-level directories without a clear reason.
 - `app/platforms/x_adapter.py` - real X posting integration
 - `app/web/` - router entrypoint, route modules, and template helpers
 - `app/web/routes/` - server-rendered page handlers grouped by area
-- `app/web/routes/media.py` - backend-owned generated-preview file serving
+- `app/web/routes/media.py` - backend-owned generated-preview and uploaded
+  media file serving
 - `app/templates/` - Jinja2 templates
 - `app/templates/partials/` - shared template fragments
 - `app/static/` - CSS and other static assets
@@ -44,6 +46,8 @@ top-level directories without a clear reason.
 - Keep platform-selection, preview, normalization, and posting orchestration in
   small top-level app modules until later phases justify a broader workflow
   package.
+- Keep history read-side queries in a small top-level app module rather than
+  pushing them into route handlers or the submission service.
 - Keep persistence code under `app/db/`.
 - Keep platform registry code in `app/platforms/`.
 - Keep configuration and settings logic near `app/config.py` unless growth makes
