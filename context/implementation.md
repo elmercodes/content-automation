@@ -1,7 +1,7 @@
 # Implementation Tracker
 
 Status legend: Not Started | In Progress | Completed
-Current phase: Phase 8 - Carousel support
+Current phase: Phase 9 - Platform adapters and posting
 
 | Phase | Status | Summary |
 | --- | --- | --- |
@@ -12,8 +12,8 @@ Current phase: Phase 8 - Carousel support
 | 5. Compose form and upload pipeline | Completed | Built the server-rendered compose form, local upload pipeline, and master post creation flow |
 | 6. Platform selection flow | Completed | Show only configured platforms and capture user choices |
 | 7. Preview engine and image normalization | Completed | Generate platform-aware previews and normalize media |
-| 8. Carousel support | In Progress | Support ordered multi-image posts and validations |
-| 9. Platform adapters and posting | Not Started | Implement provider posting integrations and safe submission |
+| 8. Carousel support | Completed | Support ordered multi-image posts and validations |
+| 9. Platform adapters and posting | In Progress | Implement provider posting integrations and safe submission |
 | 10. Results and post history | Not Started | Record outcomes and expose local history views |
 | 11. Testing, polish, and shareability | Not Started | Improve coverage, docs, packaging, and local usability |
 
@@ -47,3 +47,6 @@ Current phase: Phase 8 - Carousel support
   deterministic image normalization layer, generated preview files under local
   storage, and a real one-platform-at-a-time review step. Phase 8 is now in
   progress.
+- 2026-04-17: Phase 8 completed with ordered carousel-aware review rendering,
+  platform eligibility rules for image-only carousels, generated preview files
+  for each media item, and updated workflow tests. Phase 9 is now in progress.

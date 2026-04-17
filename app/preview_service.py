@@ -1,4 +1,4 @@
-"""Preview-state assembly for the Phase 7 server-rendered review step."""
+"""Preview-state assembly for the Phase 8 server-rendered review step."""
 
 from __future__ import annotations
 
@@ -37,14 +37,28 @@ class PostingTextMetrics:
 
 
 @dataclass(frozen=True, slots=True)
+class PreviewMediaItemState:
+    item_number: int
+    media_item: WorkflowMediaItemSummary
+    preview_image: GeneratedPreviewFile | None
+    error_message: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
 class CurrentPlatformPreviewState:
     platform: PlatformChoice
     preview_spec: PlatformPreviewSpec
-    primary_media_item: WorkflowMediaItemSummary | None
-    additional_media_items: tuple[WorkflowMediaItemSummary, ...]
-    preview_image: GeneratedPreviewFile | None
+    preview_items: tuple[PreviewMediaItemState, ...]
     text_metrics: PostingTextMetrics
     warnings: tuple[PreviewWarning, ...]
+
+    @property
+    def media_count(self) -> int:
+        return len(self.preview_items)
+
+    @property
+    def is_carousel(self) -> bool:
+        return self.media_count > 1
 
 
 @dataclass(frozen=True, slots=True)
@@ -130,13 +144,9 @@ def build_current_platform_preview(
         hashtags=post_summary.hashtags,
         limit=platform.caption_limit,
     )
-    primary_media_item = (
-        post_summary.media_items[0] if post_summary.media_items else None
-    )
-    additional_media_items = tuple(post_summary.media_items[1:])
 
     warnings: list[PreviewWarning] = []
-    preview_image: GeneratedPreviewFile | None = None
+    preview_items: list[PreviewMediaItemState] = []
 
     if text_metrics.limit is None:
         warnings.append(
@@ -162,19 +172,7 @@ def build_current_platform_preview(
             )
         )
 
-    if post_summary.media_count > 1:
-        warnings.append(
-            PreviewWarning(
-                code="multi_image_preview_partial",
-                severity="info",
-                message=(
-                    "Phase 7 previews only the first media item visually. Full "
-                    "ordered carousel preview is deferred to Phase 8."
-                ),
-            )
-        )
-
-    if primary_media_item is None:
+    if not post_summary.media_items:
         warnings.append(
             PreviewWarning(
                 code="preview_generation_failed",
@@ -182,40 +180,49 @@ def build_current_platform_preview(
                 message="This master post does not have any media items to preview.",
             )
         )
-    elif primary_media_item.media_type != "image":
-        warnings.append(
-            PreviewWarning(
-                code="preview_generation_failed",
-                severity="error",
-                message=(
-                    "Preview generation currently supports image media items only."
-                ),
-            )
-        )
     else:
-        try:
-            preview_image = generate_platform_preview_file(
-                primary_media_item,
-                post_id=post_summary.id,
-                platform_slug=platform.slug,
-                preview_spec=preview_spec,
-                settings=resolved_settings,
-            )
-        except PreviewGenerationError as exc:
-            warnings.append(
-                PreviewWarning(
-                    code="preview_generation_failed",
-                    severity="error",
-                    message=str(exc),
+        for item_number, media_item in enumerate(post_summary.media_items, start=1):
+            preview_image: GeneratedPreviewFile | None = None
+            error_message: str | None = None
+
+            if media_item.media_type != "image":
+                error_message = (
+                    "Preview generation currently supports image media items only."
+                )
+            else:
+                try:
+                    preview_image = generate_platform_preview_file(
+                        media_item,
+                        post_id=post_summary.id,
+                        platform_slug=platform.slug,
+                        preview_spec=preview_spec,
+                        settings=resolved_settings,
+                    )
+                except PreviewGenerationError as exc:
+                    error_message = str(exc)
+
+            if error_message is not None:
+                warnings.append(
+                    PreviewWarning(
+                        code="preview_generation_failed",
+                        severity="error",
+                        message=f"Item {item_number}: {error_message}",
+                    )
+                )
+
+            preview_items.append(
+                PreviewMediaItemState(
+                    item_number=item_number,
+                    media_item=media_item,
+                    preview_image=preview_image,
+                    error_message=error_message,
                 )
             )
 
     return CurrentPlatformPreviewState(
         platform=platform,
         preview_spec=preview_spec,
-        primary_media_item=primary_media_item,
-        additional_media_items=additional_media_items,
-        preview_image=preview_image,
+        preview_items=tuple(preview_items),
         text_metrics=text_metrics,
         warnings=tuple(warnings),
     )

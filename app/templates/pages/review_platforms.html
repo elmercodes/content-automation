@@ -5,9 +5,9 @@
   <p class="section-eyebrow">Platform review</p>
   <h1>Preview selected platforms</h1>
   <p>
-    Review one selected platform at a time with a locally generated preview,
-    deterministic image normalization, and simple text-length visibility from
-    the backend platform registry.
+    Review one selected platform at a time with locally generated ordered image
+    previews, deterministic normalization, and simple text-length visibility
+    from the backend platform registry.
   </p>
 </section>
 
@@ -58,6 +58,16 @@
         <dt>Current text length</dt>
         <dd>{{ current_preview.text_metrics.character_count }} characters</dd>
       </div>
+      <div>
+        <dt>Post format</dt>
+        <dd>
+          {% if current_preview.is_carousel %}
+          Image carousel · {{ current_preview.media_count }} items
+          {% else %}
+          Single image
+          {% endif %}
+        </dd>
+      </div>
     </dl>
     {% if platform_selection_url %}
     <p class="muted">
@@ -91,48 +101,73 @@
     <h2>{{ current_preview.platform.display_name }} preview</h2>
     <p class="muted">
       Original media is preserved under <code>storage/uploads/</code>. This
-      page shows a generated preview file with proportional resize and canvas
-      padding instead of default cropping.
+      page shows generated preview files for each ordered media item with
+      proportional resize and canvas padding instead of default cropping.
     </p>
 
-    {% if current_preview_image_url %}
-    <figure class="preview-frame">
-      <img
-        class="generated-preview-image"
-        src="{{ current_preview_image_url }}"
-        alt="{{ current_preview.platform.display_name }} preview for master post {{ review_page.post_id }}"
-        width="{{ current_preview.preview_spec.canvas_width }}"
-        height="{{ current_preview.preview_spec.canvas_height }}"
-      >
-    </figure>
+    {% if current_preview_items %}
+    <ol class="carousel-preview-list">
+      {% for preview_item in current_preview_items %}
+      <li class="carousel-preview-item">
+        <h3>Item {{ preview_item.item_number }}</h3>
+        {% if preview_item.preview_image_url %}
+        <figure class="preview-frame">
+          <img
+            class="generated-preview-image"
+            src="{{ preview_item.preview_image_url }}"
+            alt="{{ current_preview.platform.display_name }} preview item {{ preview_item.item_number }} for master post {{ review_page.post_id }}"
+            width="{{ current_preview.preview_spec.canvas_width }}"
+            height="{{ current_preview.preview_spec.canvas_height }}"
+          >
+        </figure>
+        {% else %}
+        <div class="empty-state inline-empty-state">
+          <h2>No preview image available</h2>
+          <p>
+            {% if preview_item.error_message %}
+            {{ preview_item.error_message }}
+            {% else %}
+            This preview item could not render an image.
+            {% endif %}
+          </p>
+        </div>
+        {% endif %}
+
+        <dl class="details compact-details">
+          <div>
+            <dt>Source media item</dt>
+            <dd>
+              {{ preview_item.media_item.label }}
+              {% if preview_item.media_item.width and preview_item.media_item.height %}
+              · {{ preview_item.media_item.width }} ×
+              {{ preview_item.media_item.height }}
+              {% endif %}
+            </dd>
+          </div>
+          <div>
+            <dt>Display order</dt>
+            <dd>{{ preview_item.media_item.display_order + 1 }}</dd>
+          </div>
+        </dl>
+      </li>
+      {% endfor %}
+    </ol>
     {% else %}
     <div class="empty-state inline-empty-state">
-      <h2>No preview image available</h2>
+      <h2>No preview items available</h2>
       <p>
-        The current platform preview could not render an image. Review the
+        The current platform preview could not render any images. Review the
         warning details on this page before continuing.
       </p>
     </div>
     {% endif %}
 
-    {% if current_preview.primary_media_item %}
     <dl class="details compact-details">
-      <div>
-        <dt>Previewed media item</dt>
-        <dd>
-          {{ current_preview.primary_media_item.label }}
-          {% if current_preview.primary_media_item.width and current_preview.primary_media_item.height %}
-          · {{ current_preview.primary_media_item.width }} ×
-          {{ current_preview.primary_media_item.height }}
-          {% endif %}
-        </dd>
-      </div>
       <div>
         <dt>Registry notes</dt>
         <dd>{{ current_preview.platform.validation_notes }}</dd>
       </div>
     </dl>
-    {% endif %}
   </article>
 
   <article class="card">
@@ -224,13 +259,10 @@
       </li>
       {% endfor %}
     </ol>
-    {% if current_preview.additional_media_items %}
     <p class="muted">
-      This Phase 7 review uses only the first media item visually. The
-      remaining ordered media items stay attached to the master post for Phase
-      8 carousel support.
+      These ordered media items are the same set that the later posting
+      adapter phase will consume for single-image or carousel submission.
     </p>
-    {% endif %}
   </article>
 </section>
 

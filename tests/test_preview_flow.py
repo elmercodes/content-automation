@@ -153,6 +153,47 @@ async def test_review_platforms_renders_generated_preview_and_navigation(
 
 
 @pytest.mark.anyio
+async def test_review_platforms_renders_all_ordered_carousel_preview_items(
+    isolated_local_runtime: Path,
+    configure_platform_env,
+) -> None:
+    configure_platform_env(instagram=True)
+    settings = get_settings()
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(
+        transport=transport,
+        base_url="http://testserver",
+    ) as client:
+        post_id = await create_master_post(client, media_sizes=[(48, 36), (36, 48)])
+        response = await client.get(
+            f"/review/platforms?post_id={post_id}&platform_slug=instagram"
+        )
+
+    assert response.status_code == 200
+    assert "Image carousel" in response.text
+    assert "Item 1" in response.text
+    assert "Item 2" in response.text
+    assert (
+        f"/media/generated/previews/v1/posts/{post_id}/instagram/media-000.png"
+        in response.text
+    )
+    assert (
+        f"/media/generated/previews/v1/posts/{post_id}/instagram/media-001.png"
+        in response.text
+    )
+    assert (
+        settings.generated_path
+        / "previews"
+        / "v1"
+        / "posts"
+        / str(post_id)
+        / "instagram"
+        / "media-001.png"
+    ).exists()
+
+
+@pytest.mark.anyio
 async def test_review_platforms_shows_over_limit_warning_for_x(
     isolated_local_runtime: Path,
     configure_platform_env,
@@ -178,31 +219,6 @@ async def test_review_platforms_shows_over_limit_warning_for_x(
     assert "exceeds the X limit of 280" in response.text
     assert "Character count" in response.text
     assert "/ 280" in response.text
-
-
-@pytest.mark.anyio
-async def test_review_platforms_marks_multi_image_preview_as_partial(
-    isolated_local_runtime: Path,
-    configure_platform_env,
-) -> None:
-    configure_platform_env(instagram=True)
-
-    transport = ASGITransport(app=app)
-    async with AsyncClient(
-        transport=transport,
-        base_url="http://testserver",
-    ) as client:
-        post_id = await create_master_post(client, media_sizes=[(48, 36), (36, 48)])
-        response = await client.get(
-            f"/review/platforms?post_id={post_id}&platform_slug=instagram"
-        )
-
-    assert response.status_code == 200
-    assert "Phase 7 previews only the first media item visually." in response.text
-    assert (
-        "remaining ordered media items stay attached to the master post"
-        in response.text
-    )
 
 
 @pytest.mark.anyio
@@ -258,3 +274,4 @@ async def test_review_final_preserves_selected_platform_handoff(
     assert "Back to previews" in response.text
     assert "Instagram" in response.text
     assert "X" in response.text
+    assert "Single image" in response.text

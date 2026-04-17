@@ -481,6 +481,29 @@ code {
   background: #f6f2ea;
 }
 
+.carousel-preview-list {
+  display: grid;
+  gap: 1.2rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.carousel-preview-item {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: rgba(255, 252, 246, 0.92);
+}
+
+.carousel-preview-item h3 {
+  margin: 0;
+}
+
+.carousel-preview-item .preview-frame {
+  margin-top: 0.8rem;
+}
+
 .posting-text-preview {
   margin: 0;
   padding: 1rem;

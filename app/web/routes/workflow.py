@@ -242,14 +242,24 @@ async def review_platforms(
         platform_index=platform_index,
     )
     current_preview = review_page.current_preview
-    current_preview_image_url = None
-    if current_preview.preview_image is not None:
-        current_preview_image_url = str(
-            request.url_for(
-                "generated_media",
-                preview_path=current_preview.preview_image.relative_path,
-            )
-        )
+    current_preview_items = tuple(
+        {
+            "item_number": preview_item.item_number,
+            "media_item": preview_item.media_item,
+            "preview_image_url": (
+                str(
+                    request.url_for(
+                        "generated_media",
+                        preview_path=preview_item.preview_image.relative_path,
+                    )
+                )
+                if preview_item.preview_image is not None
+                else None
+            ),
+            "error_message": preview_item.error_message,
+        }
+        for preview_item in current_preview.preview_items
+    )
 
     platform_navigation = tuple(
         {
@@ -303,7 +313,7 @@ async def review_platforms(
         selected_platforms=review_state.selected_platforms,
         review_page=review_page,
         current_preview=current_preview,
-        current_preview_image_url=current_preview_image_url,
+        current_preview_items=current_preview_items,
         platform_navigation=platform_navigation,
         previous_platform_url=previous_platform_url,
         next_platform_url=next_platform_url,

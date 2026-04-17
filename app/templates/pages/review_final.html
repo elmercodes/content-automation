@@ -42,6 +42,16 @@
         <dd>{{ review_post_summary.media_count }}</dd>
       </div>
       <div>
+        <dt>Post format</dt>
+        <dd>
+          {% if review_post_summary.media_count > 1 %}
+          Image carousel
+          {% else %}
+          Single image
+          {% endif %}
+        </dd>
+      </div>
+      <div>
         <dt>Caption</dt>
         <dd>
           {% if review_post_summary.caption %}
@@ -86,11 +96,12 @@
 
 <section class="card-grid">
   <article class="card">
-    <h2>Phase 7 completion point</h2>
+    <h2>Phase 8 completion point</h2>
     <p>
       Generated preview files now exist locally under
-      <code>storage/generated/</code>. Posting adapters, post platform logs, and
-      submission controls remain deferred to later phases.
+      <code>storage/generated/</code> for each ordered media item. Posting
+      adapters, post platform logs, and submission controls remain deferred to
+      later phases.
     </p>
   </article>
 

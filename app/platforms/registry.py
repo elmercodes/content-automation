@@ -32,6 +32,7 @@ class PlatformDefinition:
     supports_carousel: bool
     max_carousel_items: int
     allowed_media_types: tuple[str, ...]
+    carousel_allowed_media_types: tuple[str, ...]
     preview_spec: PlatformPreviewSpec
     caption_limit: int | None = None
     validation_notes: str = ""
@@ -54,7 +55,8 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
         required_settings=("instagram_access_token",),
         supports_carousel=True,
         max_carousel_items=10,
-        allowed_media_types=("image", "video"),
+        allowed_media_types=("image",),
+        carousel_allowed_media_types=("image",),
         preview_spec=PlatformPreviewSpec(
             canvas_width=1080,
             canvas_height=1350,
@@ -69,7 +71,8 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
         required_settings=("facebook_page_id",),
         supports_carousel=False,
         max_carousel_items=1,
-        allowed_media_types=("image", "video"),
+        allowed_media_types=("image",),
+        carousel_allowed_media_types=(),
         preview_spec=PlatformPreviewSpec(
             canvas_width=1200,
             canvas_height=1200,
@@ -85,7 +88,8 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
         required_settings=("x_api_key",),
         supports_carousel=True,
         max_carousel_items=4,
-        allowed_media_types=("image", "video"),
+        allowed_media_types=("image",),
+        carousel_allowed_media_types=("image",),
         preview_spec=PlatformPreviewSpec(
             canvas_width=1600,
             canvas_height=900,
@@ -130,6 +134,7 @@ def serialize_platform(
         "supports_carousel": platform.supports_carousel,
         "max_carousel_items": platform.max_carousel_items,
         "allowed_media_types": platform.allowed_media_types,
+        "carousel_allowed_media_types": platform.carousel_allowed_media_types,
         "preview_spec": {
             "canvas_width": platform.preview_spec.canvas_width,
             "canvas_height": platform.preview_spec.canvas_height,

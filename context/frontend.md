@@ -14,6 +14,8 @@ JavaScript application shell.
 - A real configured-platform selection form now lives on `pages/platforms.html`
 - A real one-platform-at-a-time preview step now lives on
   `pages/review_platforms.html`
+- The platform review step now renders ordered server-generated preview items
+  for image carousels without client-side interactivity
 - The final review step now preserves selected-platform workflow context on
   `pages/review_final.html`
 
@@ -40,6 +42,8 @@ JavaScript application shell.
   `platform_slug`, and a simple `platform_index` rather than client-side state.
 - Treat the preview UI as a practical local mock, not a pixel-perfect clone of
   provider interfaces.
+- Prefer simple ordered lists, thumbnail-like frames, and explicit item counts
+  for carousel review instead of interactive gallery controls.
 
 ## No-JS Boundary
 

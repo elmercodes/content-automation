@@ -134,9 +134,9 @@
                 </span>
                 <span class="muted">
                   {% if platform.supports_carousel %}
-                  Supports up to {{ platform.max_carousel_items }} media items
+                  Carousel support: up to {{ platform.max_carousel_items }} image items
                   {% else %}
-                  Single-media workflow only
+                  No carousel support in this workflow
                   {% endif %}
                 </span>
                 <span class="muted">{{ platform.validation_notes }}</span>
@@ -177,12 +177,18 @@
       <p class="muted">{{ platform.ineligibility_reason }}</p>
       <dl class="details compact-details">
         <div>
-          <dt>Allowed media types</dt>
+          <dt>Allowed single-media types</dt>
           <dd>{{ platform.allowed_media_types | join(", ") }}</dd>
         </div>
         <div>
-          <dt>Current limit</dt>
-          <dd>Up to {{ platform.max_carousel_items }} media items in this workflow</dd>
+          <dt>Carousel rule</dt>
+          <dd>
+            {% if platform.supports_carousel %}
+            Up to {{ platform.max_carousel_items }} image items in this workflow
+            {% else %}
+            Carousel posts are not supported in this workflow
+            {% endif %}
+          </dd>
         </div>
       </dl>
     </article>
@@ -216,8 +222,14 @@
         <dd>{{ platform.allowed_media_types | join(", ") }}</dd>
       </div>
       <div>
-        <dt>Current limit</dt>
-        <dd>Up to {{ platform.max_carousel_items }} media items</dd>
+        <dt>Carousel rule</dt>
+        <dd>
+          {% if platform.supports_carousel %}
+          Up to {{ platform.max_carousel_items }} image items
+          {% else %}
+          Carousel not supported
+          {% endif %}
+        </dd>
       </div>
     </dl>
     <p class="muted">{{ platform.validation_notes }}</p>

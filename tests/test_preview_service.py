@@ -62,6 +62,7 @@ def build_platform_choice(slug: str) -> PlatformChoice:
         supports_carousel=platform.supports_carousel,
         max_carousel_items=platform.max_carousel_items,
         allowed_media_types=platform.allowed_media_types,
+        carousel_allowed_media_types=platform.carousel_allowed_media_types,
         caption_limit=platform.caption_limit,
         validation_notes=platform.validation_notes,
     )
@@ -92,12 +93,13 @@ def test_build_platform_review_page_state_flags_over_limit_for_x(
 
     page = build_platform_review_page_state(review_state, settings=settings)
 
-    assert page.current_preview.preview_image is not None
+    assert len(page.current_preview.preview_items) == 1
+    assert page.current_preview.preview_items[0].preview_image is not None
     assert page.current_preview.text_metrics.over_limit is True
     assert {warning.code for warning in page.current_preview.warnings} == {"over_limit"}
 
 
-def test_build_platform_review_page_state_marks_multi_image_preview_as_partial(
+def test_build_platform_review_page_state_builds_ordered_carousel_preview_items(
     tmp_path: Path,
 ) -> None:
     settings = build_test_settings(tmp_path)
@@ -116,10 +118,26 @@ def test_build_platform_review_page_state_marks_multi_image_preview_as_partial(
 
     page = build_platform_review_page_state(review_state, settings=settings)
 
-    assert page.current_preview.primary_media_item is not None
-    assert page.current_preview.primary_media_item.display_order == 0
-    assert len(page.current_preview.additional_media_items) == 1
-    assert "multi_image_preview_partial" in {
+    assert page.current_preview.is_carousel is True
+    assert [
+        item.media_item.display_order for item in page.current_preview.preview_items
+    ] == [
+        0,
+        1,
+    ]
+    assert [item.item_number for item in page.current_preview.preview_items] == [1, 2]
+    assert all(
+        item.preview_image is not None for item in page.current_preview.preview_items
+    )
+    assert {
+        item.preview_image.relative_path
+        for item in page.current_preview.preview_items
+        if item.preview_image is not None
+    } == {
+        "previews/v1/posts/7/instagram/media-000.png",
+        "previews/v1/posts/7/instagram/media-001.png",
+    }
+    assert "multi_image_preview_partial" not in {
         warning.code for warning in page.current_preview.warnings
     }
 

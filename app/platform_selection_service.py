@@ -53,6 +53,7 @@ class PlatformChoice:
     supports_carousel: bool
     max_carousel_items: int
     allowed_media_types: tuple[str, ...]
+    carousel_allowed_media_types: tuple[str, ...]
     caption_limit: int | None
     validation_notes: str
     selected: bool = False
@@ -201,6 +202,7 @@ def load_platform_selection_state(
             supports_carousel=platform.supports_carousel,
             max_carousel_items=platform.max_carousel_items,
             allowed_media_types=platform.allowed_media_types,
+            carousel_allowed_media_types=platform.carousel_allowed_media_types,
             caption_limit=platform.caption_limit,
             validation_notes=platform.validation_notes,
             selected=platform.slug in selected_lookup,
@@ -332,15 +334,31 @@ def _get_ineligibility_reason(
     if not post_summary.media_items:
         return "This master post does not have any media items yet."
 
+    if post_summary.media_count > 1 and not platform.supports_carousel:
+        return (
+            f"{platform.display_name} does not support multi-image carousel posts "
+            "in this workflow."
+        )
+
+    allowed_media_types = (
+        platform.carousel_allowed_media_types
+        if post_summary.media_count > 1
+        else platform.allowed_media_types
+    )
     unsupported_media_types = sorted(
         {
             media_item.media_type
             for media_item in post_summary.media_items
-            if media_item.media_type not in platform.allowed_media_types
+            if media_item.media_type not in allowed_media_types
         }
     )
     if unsupported_media_types:
         unsupported_media_label = ", ".join(unsupported_media_types)
+        if post_summary.media_count > 1:
+            return (
+                f"{platform.display_name} carousel posts are not ready for "
+                f"{unsupported_media_label} media items in this workflow."
+            )
         return (
             f"{platform.display_name} is not ready for {unsupported_media_label} "
             "media items in this workflow."

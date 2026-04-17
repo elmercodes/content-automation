@@ -20,7 +20,7 @@ not an implementation spec for provider adapters yet.
    way.
 11. Record per-platform outcomes in post platform logs.
 
-## Phase 6 Baseline
+## Current Baseline
 
 - `POST /compose` creates a master post and ordered media items locally.
 - The compose flow accepts optional caption and hashtag text plus one or more
@@ -33,10 +33,11 @@ not an implementation spec for provider adapters yet.
   `/review/platforms?post_id=<id>&platform_slug=...`.
 - `GET /review/platforms` now generates a local preview for one selected
   platform at a time, using the backend platform registry plus image
-  normalization to show a practical mock preview, text length visibility, and
-  obvious warning states.
+  normalization to show ordered per-item preview output, text length
+  visibility, and obvious warning states.
 - `GET /review/final` now preserves the selected-platform handoff after preview
-  generation, but still stops before any provider adapter or submission logic.
+  generation and summarizes whether the master post is a single image or image
+  carousel, but still stops before any provider adapter or submission logic.
 - Failed compose or platform-selection submissions return to the same
   server-rendered page with explicit HTML error messages and no partial local
   state retained.

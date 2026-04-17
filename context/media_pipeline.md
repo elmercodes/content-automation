@@ -45,13 +45,14 @@ the actual files live under `storage/`.
 - Video intake is deferred until later phases add metadata extraction and
   preview support for that media type.
 
-## Phase 7 Preview Rules
+## Phase 8 Preview Rules
 
 - Preview generation is deterministic and regenerable.
 - Generated preview files are local artifacts, not durable primary records.
-- Phase 7 is single-image-first: when multiple media items exist, the preview
-  step renders only the first media item visually and keeps the rest visible as
-  ordered metadata until Phase 8.
+- Phase 8 generates one preview artifact per ordered media item for the current
+  platform review step.
+- The review workflow renders all ordered image items for eligible carousel
+  platforms without introducing a JavaScript gallery.
 - The default background strategy is a neutral solid canvas fill rather than
   image-aware gradients or automatic cropping.
 

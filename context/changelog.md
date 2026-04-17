@@ -2,6 +2,18 @@
 
 Notable repository changes are listed here in a short human-readable form.
 
+## 2026-04-17
+
+- Completed Phase 8 with ordered multi-image carousel review support in the
+  server-rendered workflow.
+- Extended backend platform capability metadata for carousel-specific image
+  rules and tightened platform eligibility messaging for unsupported or
+  over-limit carousel selections.
+- Updated the review step to generate and render one local preview artifact per
+  ordered media item while preserving the existing no-JS page flow.
+- Added automated coverage for carousel preview generation, review rendering,
+  and carousel platform eligibility limits.
+
 ## 2026-04-16
 
 - Completed Phase 7 with deterministic image normalization, generated preview

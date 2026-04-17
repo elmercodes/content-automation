@@ -169,9 +169,30 @@ async def test_platforms_page_marks_facebook_ineligible_for_multi_image_post(
     assert response.status_code == 200
     assert 'value="instagram"' in response.text
     assert 'value="facebook"' not in response.text
-    assert (
-        "Facebook only supports a single media item in this workflow." in response.text
-    )
+    assert "Facebook does not support multi-image carousel posts" in response.text
+
+
+@pytest.mark.anyio
+async def test_platforms_page_marks_x_ineligible_when_carousel_exceeds_limit(
+    isolated_local_runtime: Path,
+    configure_platform_env,
+) -> None:
+    configure_platform_env(x=True)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(
+        transport=transport,
+        base_url="http://testserver",
+    ) as client:
+        post_id = await create_master_post(
+            client,
+            media_sizes=[(48, 36), (36, 48), (32, 32), (28, 28), (24, 24)],
+        )
+        response = await client.get(f"/platforms?post_id={post_id}")
+
+    assert response.status_code == 200
+    assert 'value="x"' not in response.text
+    assert "X currently supports up to 4 media items in this workflow." in response.text
 
 
 @pytest.mark.anyio

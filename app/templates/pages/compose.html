@@ -65,7 +65,7 @@
         >
         <p class="field-help">
           Add 1 to {{ max_media_files }} images. Upload order becomes the saved
-          display order for future carousel support.
+          display order for carousel review and later posting steps.
         </p>
         {% if field_errors.get("media_files") %}
         <ul class="error-list">
@@ -81,10 +81,11 @@
   </article>
 
   <article class="card">
-    <h2>Phase 5 upload rules</h2>
+    <h2>Upload rules</h2>
     <ul class="feature-list">
       <li>Supported image types: JPG, PNG, and WEBP</li>
       <li>Files are saved locally under <code>storage/uploads/</code></li>
+      <li>Multi-image uploads become ordered carousel items automatically</li>
       <li>Image width and height are captured for each media item</li>
       <li>The next step redirects to <a href="{{ request.url_for('platforms') }}">platform selection</a></li>
     </ul>

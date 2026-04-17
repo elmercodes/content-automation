@@ -11,7 +11,7 @@ capability rules, and credential expectations.
 - Centralize platform capabilities so validation and UI decisions share the same
   source of truth.
 
-## Phase 7 Baseline
+## Phase 8 Baseline
 
 - The registry lives in `app/platforms/registry.py`.
 - The supported platform set currently includes `instagram`, `facebook`, and
@@ -21,8 +21,9 @@ capability rules, and credential expectations.
   - stable slug and display name
   - required settings fields for local visibility
   - coarse capability metadata such as carousel support, maximum carousel size,
-    allowed media types, and broad caption limits
-  - preview canvas metadata for the Phase 7 review step, including a fixed
+    single-media allowed media types, carousel-allowed media types, and broad
+    caption limits
+  - preview canvas metadata for the review step, including a fixed
     canvas size, frame label, and deterministic background color
   - lightweight validation notes that can be shown in server-rendered workflow
     pages
@@ -33,7 +34,8 @@ capability rules, and credential expectations.
   post-specific eligibility guardrails in backend service code before a
   platform can be selected.
 - Phase 7 reuses the same registry entries to decide how preview generation and
-  text-limit visibility should behave per selected platform.
+  text-limit visibility should behave per selected platform, and Phase 8 uses
+  the same metadata to decide carousel eligibility.
 
 ## Supported vs Configured vs Eligible
 
@@ -61,6 +63,8 @@ capability rules, and credential expectations.
 - Provider-specific HTTP logic is deferred until the adapter phase.
 - Exact adapter credential rules, submission payload details, and final
   validation behavior are deferred until later phases.
+- The current workflow remains image-only even where a future platform adapter
+  may support video outside this phase.
 
 ## Related Docs
 

@@ -40,3 +40,15 @@ def test_platform_registry_reports_missing_required_settings() -> None:
 def test_unknown_platform_lookup_fails() -> None:
     with pytest.raises(KeyError, match="Unsupported platform"):
         get_platform("linkedin")
+
+
+def test_platform_registry_exposes_image_only_carousel_rules_for_current_workflow() -> (
+    None
+):
+    instagram = get_platform("instagram")
+    facebook = get_platform("facebook")
+
+    assert instagram.allowed_media_types == ("image",)
+    assert instagram.carousel_allowed_media_types == ("image",)
+    assert facebook.allowed_media_types == ("image",)
+    assert facebook.carousel_allowed_media_types == ()
