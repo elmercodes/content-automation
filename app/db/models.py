@@ -1,4 +1,4 @@
-"""Core ORM models for master posts, media items, and post platform logs."""
+"""Core ORM models for master posts, media items, connected accounts, and logs."""
 
 from __future__ import annotations
 
@@ -23,9 +23,16 @@ POST_PLATFORM_LOG_STATUSES = (
     "pending",
     "posted",
     "not_configured",
+    "not_connected",
+    "reauthorization_required",
     "unsupported",
     "validation_failed",
     "submission_failed",
+)
+CONNECTED_ACCOUNT_STATUSES = (
+    "active",
+    "disconnected",
+    "reauthorization_required",
 )
 
 
@@ -127,6 +134,8 @@ class PostPlatformLog(Base):
             "'pending', "
             "'posted', "
             "'not_configured', "
+            "'not_connected', "
+            "'reauthorization_required', "
             "'unsupported', "
             "'validation_failed', "
             "'submission_failed'"
@@ -157,7 +166,95 @@ class PostPlatformLog(Base):
     )
     posted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     external_post_id: Mapped[str | None] = mapped_column(Text)
+    account_display_name: Mapped[str | None] = mapped_column(Text)
+    account_identifier: Mapped[str | None] = mapped_column(Text)
     error_message: Mapped[str | None] = mapped_column(Text)
     response_summary: Mapped[str | None] = mapped_column(Text)
 
     post: Mapped[Post] = relationship(back_populates="post_platform_logs")
+
+
+class ConnectedAccount(Base):
+    """A locally stored provider account authorized through OAuth."""
+
+    __tablename__ = "connected_accounts"
+    __table_args__ = (
+        UniqueConstraint("provider_slug", name="uq_connected_accounts_provider_slug"),
+        CheckConstraint(
+            "connection_status IN ("
+            "'active', "
+            "'disconnected', "
+            "'reauthorization_required'"
+            ")",
+            name="connection_status_allowed",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    provider_slug: Mapped[str] = mapped_column(String(50), nullable=False)
+    provider_account_id: Mapped[str | None] = mapped_column(String(255))
+    account_type: Mapped[str | None] = mapped_column(String(100))
+    display_name: Mapped[str | None] = mapped_column(String(255))
+    username: Mapped[str | None] = mapped_column(String(255))
+    access_token: Mapped[str | None] = mapped_column(Text)
+    refresh_token: Mapped[str | None] = mapped_column(Text)
+    token_type: Mapped[str | None] = mapped_column(String(50))
+    scopes: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        default="",
+        server_default=text("''"),
+    )
+    expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    refresh_expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    connection_status: Mapped[str] = mapped_column(
+        String(32),
+        nullable=False,
+        default="active",
+        server_default=text("'active'"),
+    )
+    provider_metadata_json: Mapped[str | None] = mapped_column(Text)
+    last_validated_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    last_used_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utcnow,
+        server_default=text("CURRENT_TIMESTAMP"),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utcnow,
+        onupdate=utcnow,
+        server_default=text("CURRENT_TIMESTAMP"),
+    )
+
+
+class OAuthConnectionAttempt(Base):
+    """Short-lived local OAuth state and PKCE verifier storage."""
+
+    __tablename__ = "oauth_connection_attempts"
+    __table_args__ = (
+        UniqueConstraint(
+            "state_token",
+            name="uq_oauth_connection_attempts_state_token",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    provider_slug: Mapped[str] = mapped_column(String(50), nullable=False)
+    state_token: Mapped[str] = mapped_column(String(255), nullable=False)
+    code_verifier: Mapped[str | None] = mapped_column(Text)
+    pending_payload_json: Mapped[str | None] = mapped_column(Text)
+    redirect_after: Mapped[str | None] = mapped_column(Text)
+    expires_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        nullable=False,
+        default=utcnow,
+        server_default=text("CURRENT_TIMESTAMP"),
+    )

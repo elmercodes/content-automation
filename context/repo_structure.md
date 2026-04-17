@@ -1,81 +1,29 @@
 # Repo Structure
 
-This repo is intentionally small. Keep the layout obvious and avoid adding new
-top-level directories without a clear reason.
+This repo stays intentionally small. Keep the layout obvious.
 
 ## Current Layout
 
-- `app/` - application package
-- `app/compose_service.py` - compose flow orchestration and master post creation
-- `app/db/` - SQLAlchemy models, SQLite runtime helpers, and persistence
-  metadata
-- `app/image_normalization.py` - deterministic image normalization and preview
-  file generation
-- `app/media_uploads.py` - local upload validation, file saves, metadata, and
-  cleanup helpers
-- `app/presentation.py` - backend-owned presentation helpers for timestamps and
-  other repeated display formatting
-- `app/platform_selection_service.py` - configured-platform resolution,
-  lightweight workflow eligibility, and handoff helpers
-- `app/preview_service.py` - preview-state assembly and warning generation for
-  the review step
-- `app/posting_service.py` - final-review submission orchestration and post
-  platform log updates
-- `app/history_service.py` - read-side results and history state assembly
-- `app/platforms/` - platform registry metadata, posting adapter types, and
-  provider implementations
-- `app/platforms/adapters.py` - shared posting request/result types plus
-  adapter resolution
-- `app/platforms/x_adapter.py` - real X posting integration
-- `app/web/` - router entrypoint, route modules, and template helpers
-- `app/web/routes/` - server-rendered page handlers grouped by area
-- `app/web/routes/media.py` - backend-owned generated-preview and uploaded
-  media file serving
-- `app/templates/` - Jinja2 templates
-- `app/templates/partials/` - shared template fragments
-- `app/static/` - CSS and other static assets
-- `alembic/` - migration scaffold and future migration revisions
-- `context/` - durable project and agent documentation
-- `storage/` - local runtime data root for uploads, generated assets, and the
-  SQLite database
+- `app/accounts_service.py` - connected-account persistence and runtime state
+- `app/oauth_clients.py` - provider-specific OAuth connect and refresh helpers
+- `app/platforms/` - provider metadata and posting adapters
+- `app/db/` - SQLAlchemy models and runtime DB helpers
+- `app/web/routes/accounts.py` - server-rendered account connection workflow
+- `app/web/routes/workflow.py` - compose, review, results, and history flow
+- `app/templates/pages/` - server-rendered page templates
+- `alembic/` - migration revisions
+- `context/` - durable project and agent docs
+- `storage/` - local runtime data root
 - `tests/` - automated tests
 
 ## Placement Rules
 
-- Put request handlers and page flow code under `app/web/routes/`.
-- Keep compose orchestration and upload helpers in small top-level app modules
-  until the workflow grows enough to justify a deeper package split.
-- Keep platform-selection, preview, normalization, and posting orchestration in
-  small top-level app modules until later phases justify a broader workflow
-  package.
-- Keep history read-side queries in a small top-level app module rather than
-  pushing them into route handlers or the submission service.
-- Keep shared presentation helpers small and backend-owned instead of pushing
-  repeated formatting logic into templates.
-- Keep persistence code under `app/db/`.
-- Keep platform registry code in `app/platforms/`.
-- Keep configuration and settings logic near `app/config.py` unless growth makes
-  a dedicated settings module necessary.
-- Add future persistence modules under `app/` rather than creating a separate
-  service repository or package tree.
-- Do not create empty `services`, `models`, `adapters`, or `utils` packages
-  before a phase needs them.
-- Keep repo-facing guidance in `AGENTS.md` and topic-specific guidance under
-  `context/`.
+- Put provider OAuth HTTP details in `app/oauth_clients.py`.
+- Put shared connected-account orchestration in `app/accounts_service.py`.
+- Keep provider posting HTTP logic in `app/platforms/`.
+- Keep server-rendered route handlers in `app/web/routes/`.
 
-## Storage Conventions
+## Related Docs
 
-- `storage/uploads/` is for user-provided media.
-- `storage/generated/` is for local derivatives, previews, or normalized assets.
-- `storage/generated/previews/v1/` is the current generated preview namespace
-  for Phase 7 artifacts.
-- `storage/db/` is for the local SQLite database file.
-- Runtime data under `storage/` stays out of version control except for
-  placeholder `.gitkeep` files.
-
-## Documentation Ownership
-
-- `AGENTS.md` owns repo-wide working rules.
-- `context/index.md` owns documentation navigation.
-- Topic docs under `context/` own durable design intent for their area.
-- `context/implementation.md` owns phase status only.
+- [`architecture.md`](architecture.md)
+- [`backend.md`](backend.md)

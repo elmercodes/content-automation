@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-intro">
+  <p class="section-eyebrow">Accounts</p>
+  <h1>Connect provider accounts locally</h1>
+  <p>
+    Provider app settings stay in <code>.env</code>, but platform availability
+    now depends on locally stored connected accounts created through OAuth.
+  </p>
+</section>
+
+{% if notice_message %}
+<section class="alert success-card">
+  <p>{{ notice_message }}</p>
+</section>
+{% endif %}
+
+{% if error_message %}
+<section class="alert error-alert">
+  <p>{{ error_message }}</p>
+</section>
+{% endif %}
+
+<section class="card-grid">
+  {% for state in provider_states %}
+  <article class="card">
+    <h2>{{ state.platform.display_name }}</h2>
+    <dl class="details compact-details">
+      <div>
+        <dt>App config</dt>
+        <dd>
+          {% if state.app_configured %}
+          Ready
+          {% else %}
+          Missing
+          {% endif %}
+        </dd>
+      </div>
+      <div>
+        <dt>Connection</dt>
+        <dd>{{ state.connection_status | replace("_", " ") | title }}</dd>
+      </div>
+      <div>
+        <dt>Posting</dt>
+        <dd>{{ state.posting_status | replace("_", " ") | title }}</dd>
+      </div>
+      {% if state.connected_account %}
+      <div>
+        <dt>Connected account</dt>
+        <dd>{{ state.connected_account.account_label }}</dd>
+      </div>
+      {% endif %}
+    </dl>
+    <p class="muted">{{ state.connection_message }}</p>
+    <p class="muted">{{ state.posting_message }}</p>
+    <div class="button-row compact-button-row">
+      {% if state.connectable %}
+      <a class="button-primary" href="{{ request.url_for('connect_provider', provider=state.platform.slug) }}">
+        {% if state.connected %}
+        Reconnect
+        {% else %}
+        Connect
+        {% endif %}
+      </a>
+      {% endif %}
+      {% if state.connected_account %}
+      <form method="post" action="{{ request.url_for('disconnect_provider', provider=state.platform.slug) }}">
+        <button class="button-secondary" type="submit">Disconnect</button>
+      </form>
+      {% endif %}
+    </div>
+  </article>
+  {% endfor %}
+</section>
+{% endblock %}

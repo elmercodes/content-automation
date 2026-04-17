@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -8,7 +9,11 @@ import pytest
 
 from app.config import Settings
 from app.platforms import get_platform
-from app.platforms.adapters import PostingMediaItem, PostingRequest
+from app.platforms.adapters import (
+    PostingConnectedAccount,
+    PostingMediaItem,
+    PostingRequest,
+)
 from app.platforms.x_adapter import XAdapter
 
 
@@ -25,10 +30,7 @@ def build_settings(tmp_path: Path) -> Settings:
         uploads_dir=uploads_dir,
         generated_dir=generated_dir,
         database_url=f"sqlite:///{database_path}",
-        x_api_key="key",
-        x_api_secret="secret",
-        x_access_token="token",
-        x_access_token_secret="token-secret",
+        x_client_id="x-client-id",
     )
 
 
@@ -64,6 +66,16 @@ def build_request(
         hashtags="#phase9",
         posting_text="Launch locally\n\n#phase9",
         media_items=tuple(media_items),
+        connected_account=PostingConnectedAccount(
+            provider_slug="x",
+            provider_account_id="x-user-1",
+            display_name="Test X User",
+            username="test_x",
+            access_token="token",
+            refresh_token="refresh-token",
+            token_type="Bearer",
+            scopes=("tweet.write", "media.write", "users.read", "offline.access"),
+        ),
     )
 
 
@@ -80,23 +92,17 @@ def test_x_adapter_posts_image_batches_and_normalizes_success(
         if str(http_request.url) == XAdapter.MEDIA_UPLOAD_URL:
             media_id = f"media-{len(uploaded_media_ids) + 1}"
             uploaded_media_ids.append(media_id)
-            assert http_request.headers["Authorization"].startswith("OAuth ")
-            return httpx.Response(200, json={"media_id_string": media_id})
-        if str(http_request.url) == XAdapter.STATUS_UPDATE_URL:
-            assert http_request.headers["Authorization"].startswith("OAuth ")
-            body_text = http_request.content.decode("utf-8")
-            assert "status=Launch+locally%0A%0A%23phase9" in body_text
-            assert f"media_ids={'%2C'.join(uploaded_media_ids)}" in body_text
+            assert http_request.headers["Authorization"] == "Bearer token"
+            return httpx.Response(200, json={"data": {"id": media_id}})
+        if str(http_request.url) == XAdapter.CREATE_POST_URL:
+            assert http_request.headers["Authorization"] == "Bearer token"
+            assert json.loads(http_request.content.decode("utf-8")) == {
+                "media": {"media_ids": uploaded_media_ids},
+                "text": "Launch locally\n\n#phase9",
+            }
             return httpx.Response(
                 200,
-                json={
-                    "id_str": "tweet-123",
-                    "extended_entities": {
-                        "media": [
-                            {"id_str": media_id} for media_id in uploaded_media_ids
-                        ]
-                    },
-                },
+                json={"data": {"id": "tweet-123"}},
             )
         raise AssertionError(
             f"Unexpected request: {http_request.method} {http_request.url}"
@@ -124,26 +130,36 @@ def test_x_adapter_returns_not_configured_when_local_credentials_are_incomplete(
     tmp_path: Path,
 ) -> None:
     settings = build_settings(tmp_path)
-    incomplete_settings = Settings(
-        _env_file=None,
-        storage_root=settings.storage_root,
-        uploads_dir=settings.uploads_dir,
-        generated_dir=settings.generated_dir,
-        database_url=settings.database_url,
-        x_api_key="key",
-    )
     request = build_request(settings, media_count=1)
+    request = PostingRequest(
+        post_id=request.post_id,
+        platform_definition=request.platform_definition,
+        caption=request.caption,
+        hashtags=request.hashtags,
+        posting_text=request.posting_text,
+        media_items=request.media_items,
+        connected_account=PostingConnectedAccount(
+            provider_slug="x",
+            provider_account_id="x-user-1",
+            display_name="Test X User",
+            username="test_x",
+            access_token="token",
+            refresh_token="refresh-token",
+            token_type="Bearer",
+            scopes=("users.read",),
+        ),
+    )
     adapter = XAdapter()
 
     result = adapter.validate(
         request,
-        incomplete_settings,
+        settings,
         attempted_at=datetime(2026, 4, 17, 18, 5, tzinfo=UTC),
     )
 
     assert result is not None
-    assert result.status == "not_configured"
-    assert "x_api_secret" in (result.error_message or "")
+    assert result.status == "reauthorization_required"
+    assert "tweet.write" in (result.error_message or "")
 
 
 def test_x_adapter_normalizes_http_failures_to_submission_failed(
@@ -154,8 +170,8 @@ def test_x_adapter_normalizes_http_failures_to_submission_failed(
 
     def handler(http_request: httpx.Request) -> httpx.Response:
         if str(http_request.url) == XAdapter.MEDIA_UPLOAD_URL:
-            return httpx.Response(200, json={"media_id_string": "media-1"})
-        if str(http_request.url) == XAdapter.STATUS_UPDATE_URL:
+            return httpx.Response(200, json={"data": {"id": "media-1"}})
+        if str(http_request.url) == XAdapter.CREATE_POST_URL:
             return httpx.Response(500, text="server error")
         raise AssertionError(
             f"Unexpected request: {http_request.method} {http_request.url}"

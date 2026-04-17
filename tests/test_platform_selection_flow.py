@@ -23,7 +23,7 @@ async def test_platforms_page_without_post_id_guides_user_to_compose(
 
     assert response.status_code == 200
     assert "Save a master post before choosing platforms" in response.text
-    assert "No platforms are configured locally" in response.text
+    assert "Instagram" in response.text
 
 
 @pytest.mark.anyio
@@ -42,7 +42,7 @@ async def test_platforms_page_shows_only_configured_platforms_for_master_post(
         response = await client.get(f"/platforms?post_id={post_id}")
 
     assert response.status_code == 200
-    assert "Choose configured platforms" in response.text
+    assert "Choose connected platforms" in response.text
     assert 'value="instagram"' in response.text
     assert 'value="facebook"' in response.text
     assert 'value="x"' not in response.text
@@ -112,7 +112,7 @@ async def test_submit_platform_selection_requires_one_platform(
         )
 
     assert response.status_code == 400
-    assert "Select at least one configured platform before continuing." in response.text
+    assert "Select at least one connected platform before continuing." in response.text
 
 
 @pytest.mark.anyio
@@ -135,7 +135,7 @@ async def test_submit_platform_selection_rejects_unconfigured_platforms(
         )
 
     assert response.status_code == 400
-    assert "Choose only configured platforms shown on this page." in response.text
+    assert "Choose only connected platforms shown on this page." in response.text
     assert 'value="instagram"' in response.text
     assert 'value="x"' not in response.text
 
@@ -214,7 +214,7 @@ async def test_review_platforms_requires_selected_platforms_when_post_id_present
         response = await client.get(f"/review/platforms?post_id={post_id}")
 
     assert response.status_code == 400
-    assert "Select at least one configured platform before continuing." in response.text
+    assert "Select at least one connected platform before continuing." in response.text
     assert f"/platforms?post_id={post_id}" in response.text
 
 

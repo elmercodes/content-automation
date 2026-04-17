@@ -82,7 +82,7 @@ async def test_review_final_shows_posting_readiness_by_platform(
     assert response.status_code == 200
     assert "Posting readiness:" in response.text
     assert "Ready" in response.text
-    assert "Direct posting is deferred because the current local-only workflow" in (
+    assert "Direct posting remains deferred because Meta content publishing" in (
         response.text
     )
 

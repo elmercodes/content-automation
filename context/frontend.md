@@ -1,82 +1,26 @@
 # Frontend Direction
 
-The frontend is server-rendered HTML delivered by FastAPI and Jinja2. The user
-experience should come from clear page flow, forms, and templates rather than a
-JavaScript application shell.
+The frontend stays server-rendered with FastAPI + Jinja2. OAuth account
+connection also stays HTML-first and no-JS.
 
 ## Current Baseline
 
 - Shared layout in `app/templates/base.html`
-- Shared partials in `app/templates/partials/`
-- Workflow pages in `app/templates/pages/`
-- Static styling in `app/static/styles.css`
-- A real multipart compose form now lives on `pages/compose.html`
-- A real configured-platform selection form now lives on `pages/platforms.html`
-- A real one-platform-at-a-time preview step now lives on
-  `pages/review_platforms.html`
-- The platform review step now renders ordered server-generated preview items
-  for image carousels without client-side interactivity
-- The final review step now preserves selected-platform workflow context on
-  `pages/review_final.html`
-- Real results and history pages now live on `pages/results.html`,
-  `pages/history.html`, and `pages/history_detail.html`
-- A real browser-friendly error page now lives on `pages/error.html`
-- Shared latest-outcome and status partials now live under
-  `app/templates/partials/`
+- Workflow pages under `app/templates/pages/`
+- A new `Accounts` page for provider connection management
+- A no-JS Facebook Page selection page for multi-Page logins
+- Existing compose, platforms, preview, final review, results, and history
+  pages remain server-rendered
 
-## Direction
+## Rules
 
-- Keep templates organized by page and partial responsibility.
-- Prefer normal links, form posts, redirects, and rendered responses.
-- Keep pages readable without client-side scripting.
-- Favor accessible HTML semantics and explicit server-side validation messages.
-
-## Template Rules
-
-- Use Jinja2 for layout composition and repeated fragments.
-- Keep a shared page shell for nav and workflow progress so later pages reuse a
-  stable structure.
-- Keep business logic out of templates.
-- Pass already-prepared page state from route handlers into the template.
-- Keep visual state understandable from rendered HTML alone.
-- Prefer product-centric copy over phase-centric milestone language on
-  user-facing pages.
-- When form validation fails, preserve text inputs and render explicit error
-  messages in HTML.
-- Keep platform-selection state explicit in the URL handoff between steps rather
-  than relying on hidden client-side state or JavaScript.
-- Keep preview navigation explicit in the URL with `post_id`, repeated
-  `platform_slug`, and a simple `platform_index` rather than client-side state.
-- Treat the preview UI as a practical local mock, not a pixel-perfect clone of
-  provider interfaces.
-- Prefer simple ordered lists, thumbnail-like frames, and explicit item counts
-  for carousel review instead of interactive gallery controls.
-- Prefer compact cards, ordered media lists, and status badges for results and
-  history rather than dense data tables or client-side widgets.
-
-## No-JS Boundary
-
-- Do not introduce a JavaScript frontend framework.
-- Do not depend on client-side state to make page flow work.
-- Do not move validation or platform-selection rules into browser code.
-- Keep file-selection expectations honest: browsers will require media files to
-  be selected again after a validation failure.
-- Keep safe empty states honest. If a workflow step is opened without the
-  required `post_id` or selected platforms, render an explanatory HTML state
-  instead of simulating fake progress.
-- Keep preview rendering backend-owned. Generated preview images should be
-  requested from a backend route, not by mounting the storage directory as a
-  public static tree.
-- Keep history media rendering backend-owned. Uploaded originals should be
-  requested through a narrow backend route rather than by exposing
-  `storage/uploads/` directly.
-- Keep common error states readable in normal browser navigation. Missing pages
-  or records should render as HTML for the main workflow and history surfaces.
+- Use normal links, forms, redirects, and rendered responses.
+- Do not introduce client-side state to make OAuth or workflow routing work.
+- Keep provider selection explicit in URLs and forms.
+- Keep account-connection state understandable from rendered HTML alone.
 
 ## Related Docs
 
-- [`architecture.md`](architecture.md) for request flow
-- [`repo_structure.md`](repo_structure.md) for template and static asset
-  placement
+- [`architecture.md`](architecture.md)
+- [`repo_structure.md`](repo_structure.md)
 - [`decisions/004_no_js_frontend_choice.md`](decisions/004_no_js_frontend_choice.md)
-  for the explicit decision record

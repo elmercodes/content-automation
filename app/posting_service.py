@@ -10,8 +10,13 @@ from typing import Callable
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app.accounts_service import (
+    ensure_connected_account_active,
+    get_provider_runtime_state,
+    mark_connected_account_used,
+)
 from app.config import Settings, get_settings
-from app.db import PostPlatformLog
+from app.db import ConnectedAccount, PostPlatformLog
 from app.platform_selection_service import (
     PlatformChoice,
     PlatformReviewState,
@@ -19,6 +24,7 @@ from app.platform_selection_service import (
 from app.platforms import get_platform
 from app.platforms.adapters import (
     PlatformAdapter,
+    PostingConnectedAccount,
     PostingMediaItem,
     PostingRequest,
     PostingResult,
@@ -51,6 +57,7 @@ class DuplicateSubmissionError(ValueError):
 
 
 def build_posting_request(
+    session: Session,
     review_state: PlatformReviewState,
     *,
     platform: PlatformChoice,
@@ -58,6 +65,20 @@ def build_posting_request(
 ) -> PostingRequest:
     resolved_settings = settings or get_settings()
     platform_definition = get_platform(platform.slug)
+    runtime_state = get_provider_runtime_state(
+        session,
+        platform.slug,
+        settings=resolved_settings,
+    )
+    connected_account = None
+    if runtime_state.connected:
+        account = ensure_connected_account_active(
+            session,
+            provider_slug=platform.slug,
+            settings=resolved_settings,
+        )
+        if account is not None and account.access_token:
+            connected_account = _build_posting_connected_account(account)
     post_summary = review_state.post_summary
     return PostingRequest(
         post_id=post_summary.id,
@@ -82,10 +103,14 @@ def build_posting_request(
             )
             for media_item in post_summary.media_items
         ),
+        connected_account=connected_account,
+        account_status=runtime_state.connection_status,
+        account_message=runtime_state.connection_message,
     )
 
 
 def build_posting_readiness_summaries(
+    session: Session,
     review_state: PlatformReviewState,
     *,
     settings: Settings | None = None,
@@ -96,6 +121,7 @@ def build_posting_readiness_summaries(
     summaries: list[PostingReadinessSummary] = []
     for platform in review_state.selected_platforms:
         request = build_posting_request(
+            session,
             review_state,
             platform=platform,
             settings=resolved_settings,
@@ -147,6 +173,7 @@ def submit_reviewed_post(
     results: list[PostingResult] = []
     for platform in review_state.selected_platforms:
         request = build_posting_request(
+            session,
             review_state,
             platform=platform,
             settings=resolved_settings,
@@ -166,8 +193,22 @@ def submit_reviewed_post(
             resolved_adapter_resolver(request.platform_slug),
             attempted_at=pending_log.created_at,
         )
+        if request.connected_account is not None:
+            pending_log.account_display_name = request.connected_account.account_label
+            pending_log.account_identifier = (
+                request.connected_account.provider_account_id
+                or request.connected_account.username
+            )
         _apply_posting_result(pending_log, result)
         session.commit()
+        if result.status == "posted" and request.connected_account is not None:
+            connected_account = ensure_connected_account_active(
+                session,
+                provider_slug=request.platform_slug,
+                settings=resolved_settings,
+            )
+            if connected_account is not None:
+                mark_connected_account_used(session, connected_account)
         results.append(result)
 
     return tuple(results)
@@ -215,6 +256,14 @@ def _validate_submission_request(
     *,
     attempted_at: datetime,
 ) -> PostingResult | None:
+    if request.account_status != "connected":
+        return PostingResult(
+            platform_slug=request.platform_slug,
+            status=request.account_status,
+            attempted_at=attempted_at,
+            error_message=request.account_message,
+        )
+
     if not request.media_items:
         return PostingResult(
             platform_slug=request.platform_slug,
@@ -323,3 +372,19 @@ def _is_readable_file(path: Path) -> bool:
 
 def _utcnow() -> datetime:
     return datetime.now(UTC)
+
+
+def _build_posting_connected_account(
+    account: ConnectedAccount,
+) -> PostingConnectedAccount:
+    scopes = tuple(scope for scope in account.scopes.split(",") if scope)
+    return PostingConnectedAccount(
+        provider_slug=account.provider_slug,
+        provider_account_id=account.provider_account_id,
+        display_name=account.display_name,
+        username=account.username,
+        access_token=account.access_token or "",
+        refresh_token=account.refresh_token,
+        token_type=account.token_type,
+        scopes=scopes,
+    )

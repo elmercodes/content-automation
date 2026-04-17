@@ -4,6 +4,14 @@ Notable repository changes are listed here in a short human-readable form.
 
 ## 2026-04-17
 
+- Replaced env-driven provider user auth with OAuth-based connected accounts,
+  including local connected-account persistence, OAuth callback state storage,
+  and a server-rendered Accounts workflow.
+- Migrated X posting to use stored OAuth-derived user tokens instead of env
+  access credentials.
+- Added post-log account snapshots, updated provider readiness logic, restored
+  the missing implementation tracker, and refreshed docs for the new auth
+  architecture.
 - Completed Phase 11 with final shareability polish: stronger onboarding docs,
   clearer `.env.example` guidance, browser-friendly HTML error pages, cleaned up
   user-facing copy, and shared test helpers for the main workflow suite.

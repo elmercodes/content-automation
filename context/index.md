@@ -56,6 +56,9 @@ first, then follow the topic links that match the task.
   - generated preview files as local regenerable derivatives
 - [`decisions/008_synchronous_adapter_submission_and_normalized_results.md`](decisions/008_synchronous_adapter_submission_and_normalized_results.md)
   - small posting adapter contract and synchronous per-platform submission
+- [`decisions/009_oauth_connected_accounts_replace_env_user_auth.md`](decisions/009_oauth_connected_accounts_replace_env_user_auth.md)
+  - provider app config in `.env`, user auth through OAuth plus local connected
+    account storage
 
 ## Task Routing
 

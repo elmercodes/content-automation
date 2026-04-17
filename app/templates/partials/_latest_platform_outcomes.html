@@ -22,6 +22,16 @@
       External post ID: <code>{{ outcome.external_post_id }}</code>
     </p>
     {% endif %}
+    {% if outcome.account_display_name or outcome.account_identifier %}
+    <p class="muted">
+      Account:
+      {% if outcome.account_display_name %}
+      {{ outcome.account_display_name }}
+      {% else %}
+      <code>{{ outcome.account_identifier }}</code>
+      {% endif %}
+    </p>
+    {% endif %}
     {% if outcome.error_message %}
     <p class="muted">{{ outcome.error_message }}</p>
     {% endif %}

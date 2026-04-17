@@ -14,8 +14,8 @@ current status, use [`implementation.md`](implementation.md).
 4. Database and migrations: add the first real models and migration history.
 5. Compose form and upload pipeline: capture master post content and local media
    intake.
-6. Platform selection flow: show only configured platforms and store user
-   choices.
+6. Platform selection flow: show only connected eligible platforms and store
+   user choices.
 7. Preview engine and image normalization: prepare media for platform-aware
    preview and validation.
 8. Carousel support: make ordered multi-image posting fully durable.

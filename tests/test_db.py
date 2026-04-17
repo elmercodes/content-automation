@@ -142,7 +142,9 @@ def test_alembic_upgrade_creates_phase_nine_schema(tmp_path: Path) -> None:
 
     assert set(inspector.get_table_names()) == {
         "alembic_version",
+        "connected_accounts",
         "media_items",
+        "oauth_connection_attempts",
         "post_platform_logs",
         "posts",
     }
@@ -174,8 +176,44 @@ def test_alembic_upgrade_creates_phase_nine_schema(tmp_path: Path) -> None:
         "created_at",
         "posted_at",
         "external_post_id",
+        "account_display_name",
+        "account_identifier",
         "error_message",
         "response_summary",
+    }
+    assert {
+        column["name"] for column in inspector.get_columns("connected_accounts")
+    } == {
+        "id",
+        "provider_slug",
+        "provider_account_id",
+        "account_type",
+        "display_name",
+        "username",
+        "access_token",
+        "refresh_token",
+        "token_type",
+        "scopes",
+        "expires_at",
+        "refresh_expires_at",
+        "connection_status",
+        "provider_metadata_json",
+        "last_validated_at",
+        "last_used_at",
+        "created_at",
+        "updated_at",
+    }
+    assert {
+        column["name"] for column in inspector.get_columns("oauth_connection_attempts")
+    } == {
+        "id",
+        "provider_slug",
+        "state_token",
+        "code_verifier",
+        "pending_payload_json",
+        "redirect_after",
+        "expires_at",
+        "created_at",
     }
     assert {index["name"] for index in inspector.get_indexes("post_platform_logs")} >= {
         "ix_post_platform_logs_post_id",
@@ -194,4 +232,4 @@ def test_alembic_upgrade_creates_phase_nine_schema(tmp_path: Path) -> None:
             text("SELECT version_num FROM alembic_version"),
         ).scalar_one()
 
-    assert revision == "4f7d2c10c8a8"
+    assert revision == "5b4f87dd0b9c"

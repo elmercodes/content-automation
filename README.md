@@ -2,17 +2,17 @@
 
 Local-First Social Publisher is a local-only social media publishing tool built
 with Python, FastAPI, Jinja2, SQLite, and the local filesystem. It lets you
-create one master post, attach ordered media items, preview platform-aware
-output, submit where direct posting is supported, and keep a lightweight local
-history without a JavaScript frontend or any cloud dependency.
+create one master post, attach ordered media items, connect provider accounts
+through OAuth, preview platform-aware output, submit where direct posting is
+supported, and keep a lightweight local history without a JavaScript frontend.
 
 ## Current provider support
 
-| Platform | Visible when configured | Review/preview | Direct posting | Notes |
+| Platform | App config in `.env` | Account connection | Direct posting | Notes |
 | --- | --- | --- | --- | --- |
-| Instagram | `INSTAGRAM_ACCESS_TOKEN` | Yes | No | Image-only single posts and carousels can move through review. Direct posting is intentionally deferred in the current local-only model. |
-| Facebook | `FACEBOOK_PAGE_ID` | Yes | Yes for preview only | No | Image-only single posts can move through review. Carousel posting is not supported in the current workflow. |
-| X | `X_API_KEY` | Yes | Yes | Image-only single posts and carousels up to 4 images. Real posting requires `X_API_KEY`, `X_API_SECRET`, `X_ACCESS_TOKEN`, and `X_ACCESS_TOKEN_SECRET`. |
+| Instagram | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Yes | No | Professional-account connection is supported. Preview/review stays available after connect, but direct posting is still deferred because Meta publishing requires public media URLs. |
+| Facebook | `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET` | Yes | No | Login plus managed Page selection is supported. Preview/review stays available after connect, but direct posting is still deferred. |
+| X | `X_CLIENT_ID` | Yes | Yes | Uses OAuth 2.0 with PKCE for account connection, stores tokens locally in SQLite, and posts through the stored connected-account tokens. |
 
 ## Requirements
 
@@ -37,28 +37,22 @@ Open `http://127.0.0.1:8000/`.
 ## `.env` setup notes
 
 - Copy `.env.example` to `.env` before the first run.
-- Leave provider values empty if you want to explore the app without configured
-  platforms.
-- Platform visibility and direct posting are different:
-  - `INSTAGRAM_ACCESS_TOKEN` makes Instagram visible in the workflow, but direct
-    posting is still deferred.
-  - `FACEBOOK_PAGE_ID` makes Facebook visible in the workflow, but direct
-    posting is still deferred.
-  - `X_API_KEY` makes X visible in the workflow.
-  - X direct posting additionally requires `X_API_SECRET`,
-    `X_ACCESS_TOKEN`, and `X_ACCESS_TOKEN_SECRET`.
+- `.env` is now only for app-level runtime and provider app configuration.
+- Do not put user access tokens, refresh tokens, token secrets, or Page IDs in
+  `.env`.
 - Restart the app after editing `.env` because settings are cached in-process.
 - Only local SQLite database URLs are supported.
 
 ## First local run
 
-1. Open `Compose` and create a master post with 1 or more JPG, PNG, or WEBP
+1. Open `Accounts` and connect any provider accounts you want to use.
+2. Open `Compose` and create a master post with 1 or more JPG, PNG, or WEBP
    images.
-2. Continue to `Platforms` and choose from the platforms that are configured on
-   your machine.
-3. Review one selected platform at a time with generated local previews.
-4. Submit from `Final review` where direct posting is supported.
-5. Inspect the immediate `Results` page, then browse the longer-lived `History`
+3. Continue to `Platforms` and choose from the connected platforms that are
+   eligible for the current post.
+4. Review one selected platform at a time with generated local previews.
+5. Submit from `Final review` where direct posting is supported.
+6. Inspect the immediate `Results` page, then browse the longer-lived `History`
    ledger.
 
 ## Local data layout
@@ -75,7 +69,7 @@ storage/
     └── posts/
 ```
 
-- `storage/db/` holds the SQLite database.
+- `storage/db/` holds the SQLite database, including connected-account tokens.
 - `storage/uploads/` holds original uploaded media.
 - `storage/generated/` holds regenerable preview artifacts.
 - App startup creates missing directories.
@@ -101,11 +95,12 @@ pytest
 
 ## Troubleshooting
 
-- No platforms are visible:
-  - Check `.env`, then restart the app.
-- X is visible but not ready to submit:
-  - Add `X_API_SECRET`, `X_ACCESS_TOKEN`, and `X_ACCESS_TOKEN_SECRET` in
-    addition to `X_API_KEY`.
+- A provider is missing from `Accounts`:
+  - Check the provider app settings in `.env`, then restart the app.
+- A provider is visible in `Accounts` but not on `Platforms`:
+  - Connect or reconnect the provider account, then return to the workflow.
+- X is connected but not ready to submit:
+  - Reconnect X and grant the requested OAuth scopes.
 - A fresh checkout shows missing tables:
   - Run `.venv/bin/alembic upgrade head`.
 - Uploaded media or previews are missing:
@@ -113,6 +108,5 @@ pytest
 
 ## Project status
 
-- All planned roadmap phases are complete.
 - The implementation tracker lives in
   [`context/implementation.md`](context/implementation.md).

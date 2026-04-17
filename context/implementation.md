@@ -1,62 +1,13 @@
 # Implementation Tracker
 
-Status legend: Not Started | In Progress | Completed
-Current phase: Roadmap complete - All planned phases completed
+## Status
 
-| Phase | Status | Summary |
-| --- | --- | --- |
-| 1. Foundation and environment | Completed | Repo bootstrap, tooling, local run flow, minimal docs, localhost smoke app |
-| 2. AI-agent docs system | Completed | Expanded context docs, ADRs, navigation, and agent maintenance guidance |
-| 3. Core app skeleton and config | Completed | Built the real app shell, settings layer, platform registry foundation, and page flow skeleton |
-| 4. Database and migrations | Completed | Implemented SQLite models, runtime session setup, and the first Alembic migration |
-| 5. Compose form and upload pipeline | Completed | Built the server-rendered compose form, local upload pipeline, and master post creation flow |
-| 6. Platform selection flow | Completed | Show only configured platforms and capture user choices |
-| 7. Preview engine and image normalization | Completed | Generate platform-aware previews and normalize media |
-| 8. Carousel support | Completed | Support ordered multi-image posts and validations |
-| 9. Platform adapters and posting | Completed | Added synchronous provider submission, normalized post platform logs, a real X adapter, and results rendering |
-| 10. Results and post history | Completed | Added persistent history index/detail views, shared results/history presentation, and uploaded-media serving for local ledger pages |
-| 11. Testing, polish, and shareability | Completed | Expanded onboarding docs, added browser-friendly error states, cleaned up user-facing copy, and hardened tests for shareability |
+- OAuth Connected Accounts Migration: Completed
 
-## Update Rules
+## 2026-04-17
 
-- When a phase finishes, change its status to Completed.
-- Move the next phase to In Progress.
-- Add a short dated note summarizing what was completed.
-- Keep this file concise so agents can scan it quickly.
-
-## Notes
-
-- 2026-04-15: Phase 1 completed with repo bootstrap, FastAPI/Jinja2 smoke app,
-  Alembic scaffold, local storage layout, tooling, tests, and initial AI-agent
-  docs.
-- 2026-04-15: Phase 2 completed with expanded topic docs, ADRs, context
-  navigation, terminology guidance, and updated agent instructions.
-- 2026-04-15: Phase 3 completed with modular web routing, a centralized
-  settings layer, repo-stable storage paths, a backend platform registry, and
-  placeholder server-rendered workflow pages. Phase 4 is now in progress.
-- 2026-04-16: Phase 4 completed with the first SQLAlchemy models, SQLite
-  runtime session helpers, a wired Alembic migration layer, and DB-specific
-  tests. Phase 5 is now in progress.
-- 2026-04-16: Phase 5 completed with a real compose form, local image upload
-  intake, media metadata capture, cleanup on failed submissions, and a handoff
-  into the platforms page. Phase 6 is now in progress.
-- 2026-04-16: Phase 6 completed with a real configured-platform selection form,
-  lightweight eligibility guardrails, and a URL-based handoff into platform
-  review. Phase 7 is now in progress.
-- 2026-04-16: Phase 7 completed with registry-owned preview canvas metadata, a
-  deterministic image normalization layer, generated preview files under local
-  storage, and a real one-platform-at-a-time review step. Phase 8 is now in
-  progress.
-- 2026-04-17: Phase 8 completed with ordered carousel-aware review rendering,
-  platform eligibility rules for image-only carousels, generated preview files
-  for each media item, and updated workflow tests. Phase 9 is now in progress.
-- 2026-04-17: Phase 9 completed with synchronous final-review submission,
-  normalized post platform log statuses, a real X posting adapter, explicit
-  unsupported outcomes for deferred providers, and a real results page.
-- 2026-04-17: Phase 10 completed with a dedicated read-side history service,
-  real `/history` and `/history/{post_id}` pages, shared latest-outcome
-  presentation across results and history, and safe backend serving for
-  uploaded media thumbnails. Phase 11 is now in progress.
-- 2026-04-17: Phase 11 completed with stronger onboarding docs, clearer
-  `.env.example` guidance, browser-friendly HTML error pages, shared workflow
-  test helpers, and product-facing copy cleanup across the local workflow.
+- Replaced env-driven platform user auth with OAuth-based connected accounts.
+- Added `connected_accounts` and `oauth_connection_attempts` persistence.
+- Added server-rendered account connection routes and pages.
+- Migrated X posting to use stored OAuth-derived tokens.
+- Updated docs and tests to the connected-account architecture.

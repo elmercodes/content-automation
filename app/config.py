@@ -19,16 +19,17 @@ class Settings(BaseSettings):
     app_env: str = "development"
     app_host: str = "127.0.0.1"
     app_port: int = 8000
+    app_base_url: str = "http://127.0.0.1:8000"
     database_url: str = "sqlite:///./storage/db/app.db"
     storage_root: Path = Path("storage")
     uploads_dir: Path = Path("storage/uploads")
     generated_dir: Path = Path("storage/generated")
-    instagram_access_token: str | None = None
-    facebook_page_id: str | None = None
-    x_api_key: str | None = None
-    x_api_secret: str | None = None
-    x_access_token: str | None = None
-    x_access_token_secret: str | None = None
+    instagram_client_id: str | None = None
+    instagram_client_secret: str | None = None
+    facebook_client_id: str | None = None
+    facebook_client_secret: str | None = None
+    meta_api_version: str = "v23.0"
+    x_client_id: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env",

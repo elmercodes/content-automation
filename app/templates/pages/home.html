@@ -21,7 +21,8 @@
     </p>
     <ul class="feature-list">
       <li><a href="{{ request.url_for('compose') }}">Compose</a> saves one master post with ordered media items</li>
-      <li><a href="{{ request.url_for('platforms') }}">Platforms</a> shows configured platforms only</li>
+      <li><a href="{{ request.url_for('accounts') }}">Accounts</a> connects provider accounts through OAuth</li>
+      <li><a href="{{ request.url_for('platforms') }}">Platforms</a> shows connected eligible platforms only</li>
       <li><a href="{{ request.url_for('review_platforms') }}">Platform review</a> renders local previews before submission</li>
       <li><a href="{{ request.url_for('history') }}">History</a> keeps a durable local ledger of saved posts and outcomes</li>
     </ul>
@@ -34,9 +35,9 @@
   <article class="card">
     <h2>Current provider support</h2>
     <ul class="feature-list">
-      <li><strong>X</strong> can be previewed and posted directly when all four X credentials are set locally</li>
-      <li><strong>Instagram</strong> can be made visible for review with a local access token, but direct posting is deferred</li>
-      <li><strong>Facebook</strong> can be made visible for review with a local page ID, but direct posting is deferred</li>
+      <li><strong>X</strong> can be connected through OAuth and posted directly with stored local user tokens</li>
+      <li><strong>Instagram</strong> can be connected through official professional-account login for review and selection, but direct posting is deferred</li>
+      <li><strong>Facebook</strong> can be connected through login plus local Page selection for review and selection, but direct posting is deferred</li>
       <li>Carousel support is image-only in this workflow, with platform-specific limits enforced before submission</li>
     </ul>
   </article>
@@ -66,20 +67,24 @@
   <article class="card">
     <h2>Configured on this machine</h2>
     <p>
-      Platform visibility is driven by the values in <code>.env</code>. The app
-      only shows platforms whose required local settings are present.
+      Provider app settings still live in <code>.env</code>, but platform
+      availability now depends on connected accounts stored locally in SQLite.
     </p>
-    {% if configured_platforms %}
+    {% if provider_states %}
     <ul class="feature-list">
-      {% for platform in configured_platforms %}
-      <li>{{ platform.display_name }} is configured locally</li>
+      {% for state in provider_states %}
+      <li>
+        {{ state.platform.display_name }}:
+        {% if state.connected %}
+        connected{% elif state.app_configured %}ready to connect{% else %}missing app config{% endif %}
+      </li>
       {% endfor %}
     </ul>
     {% else %}
     <p class="muted">
-      No configured platforms yet. Add local values in <code>.env</code> using
-      the names shown in <code>.env.example</code> to make a platform visible in
-      the workflow.
+      No providers are available yet. Add app-level provider values in
+      <code>.env</code>, then connect accounts from
+      <a href="{{ request.url_for('accounts') }}">Accounts</a>.
     </p>
     {% endif %}
   </article>

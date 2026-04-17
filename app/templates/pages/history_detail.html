@@ -144,6 +144,18 @@
           <dd><code>{{ attempt.external_post_id }}</code></dd>
         </div>
         {% endif %}
+        {% if attempt.account_display_name or attempt.account_identifier %}
+        <div>
+          <dt>Account</dt>
+          <dd>
+            {% if attempt.account_display_name %}
+            {{ attempt.account_display_name }}
+            {% else %}
+            <code>{{ attempt.account_identifier }}</code>
+            {% endif %}
+          </dd>
+        </div>
+        {% endif %}
         {% if attempt.error_message %}
         <div>
           <dt>Error</dt>

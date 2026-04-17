@@ -9,9 +9,10 @@ from pathlib import Path
 from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
+from app.accounts_service import list_provider_runtime_states
 from app.config import Settings, get_settings
 from app.db import Post
-from app.platforms import PlatformDefinition, get_configured_platforms
+from app.platforms import PlatformDefinition
 
 
 @dataclass(frozen=True, slots=True)
@@ -75,18 +76,31 @@ class PlatformSelectionState:
     post_summary: WorkflowMasterPostSummary
     eligible_platforms: tuple[PlatformChoice, ...]
     ineligible_platforms: tuple[PlatformChoice, ...]
+    unavailable_platforms: tuple["PlatformAvailabilityNotice", ...] = ()
 
     @property
-    def configured_platforms(self) -> tuple[PlatformChoice, ...]:
+    def connected_platforms(self) -> tuple[PlatformChoice, ...]:
         return self.eligible_platforms + self.ineligible_platforms
 
     @property
-    def has_configured_platforms(self) -> bool:
-        return bool(self.configured_platforms)
+    def has_connected_platforms(self) -> bool:
+        return bool(self.connected_platforms)
 
     @property
     def has_eligible_platforms(self) -> bool:
         return bool(self.eligible_platforms)
+
+    @property
+    def has_connectable_platforms(self) -> bool:
+        return bool(self.unavailable_platforms)
+
+
+@dataclass(frozen=True, slots=True)
+class PlatformAvailabilityNotice:
+    slug: str
+    display_name: str
+    status: str
+    message: str
 
 
 @dataclass(slots=True)
@@ -132,6 +146,9 @@ def build_platform_selection_page_context(
         "eligible_platforms": state.eligible_platforms if state is not None else (),
         "ineligible_platforms": (
             state.ineligible_platforms if state is not None else ()
+        ),
+        "unavailable_platforms": (
+            state.unavailable_platforms if state is not None else ()
         ),
         "platform_selection_form": form or empty_platform_selection_form(),
         "field_errors": field_errors or {},
@@ -194,8 +211,28 @@ def load_platform_selection_state(
 
     eligible_platforms: list[PlatformChoice] = []
     ineligible_platforms: list[PlatformChoice] = []
-    for platform in get_configured_platforms(resolved_settings):
-        ineligibility_reason = _get_ineligibility_reason(platform, post_summary)
+    unavailable_platforms: list[PlatformAvailabilityNotice] = []
+    for provider_state in list_provider_runtime_states(
+        session,
+        settings=resolved_settings,
+    ):
+        platform = provider_state.platform
+        if not provider_state.connected:
+            if provider_state.connectable:
+                unavailable_platforms.append(
+                    PlatformAvailabilityNotice(
+                        slug=platform.slug,
+                        display_name=platform.display_name,
+                        status=provider_state.connection_status,
+                        message=provider_state.connection_message,
+                    )
+                )
+            continue
+
+        ineligibility_reason = _get_ineligibility_reason(
+            platform,
+            post_summary,
+        )
         choice = PlatformChoice(
             slug=platform.slug,
             display_name=platform.display_name,
@@ -218,6 +255,7 @@ def load_platform_selection_state(
         post_summary=post_summary,
         eligible_platforms=tuple(eligible_platforms),
         ineligible_platforms=tuple(ineligible_platforms),
+        unavailable_platforms=tuple(unavailable_platforms),
     )
 
 
@@ -231,8 +269,8 @@ def validate_platform_selection(
     cleaned_slugs = _clean_selected_platform_slugs(selected_platform_slugs)
     duplicate_slugs = _find_duplicate_selected_platform_slugs(selected_platform_slugs)
     eligible_platform_lookup = {platform.slug for platform in state.eligible_platforms}
-    configured_platform_lookup = {
-        platform.slug for platform in state.configured_platforms
+    connected_platform_lookup = {
+        platform.slug for platform in state.connected_platforms
     }
     normalized_selected_slugs = tuple(
         platform.slug
@@ -246,7 +284,7 @@ def validate_platform_selection(
 
     if not cleaned_slugs:
         field_errors["platform_slug"] = [
-            "Select at least one configured platform before continuing."
+            "Select at least one connected platform before continuing."
         ]
         return PlatformSelectionValidationResult(form=form, field_errors=field_errors)
 
@@ -255,13 +293,13 @@ def validate_platform_selection(
             "Each platform can only be selected once."
         )
 
-    if any(slug not in configured_platform_lookup for slug in cleaned_slugs):
+    if any(slug not in connected_platform_lookup for slug in cleaned_slugs):
         field_errors.setdefault("platform_slug", []).append(
-            "Choose only configured platforms shown on this page."
+            "Choose only connected platforms shown on this page."
         )
 
     if any(
-        slug in configured_platform_lookup and slug not in eligible_platform_lookup
+        slug in connected_platform_lookup and slug not in eligible_platform_lookup
         for slug in cleaned_slugs
     ):
         field_errors.setdefault("platform_slug", []).append(

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="page-intro">
+  <p class="section-eyebrow">Facebook</p>
+  <h1>Choose a Page to connect</h1>
+  <p>
+    Your Facebook login can manage more than one Page. Choose the Page this app
+    should use locally.
+  </p>
+</section>
+
+{% if selection_error %}
+<section class="alert error-alert">
+  <p>{{ selection_error }}</p>
+</section>
+{% endif %}
+
+<section class="card-grid">
+  <article class="card form-card">
+    <h2>Managed Pages</h2>
+    <form method="post" action="{{ request.url_for('submit_facebook_select_page') }}">
+      <input type="hidden" name="attempt_id" value="{{ attempt_id }}">
+
+      <fieldset class="platform-fieldset">
+        <legend>Available Pages</legend>
+        <div class="platform-choice-list">
+          {% for page in page_options %}
+          <label class="platform-choice-card" for="page-{{ page.page_id }}">
+            <span class="platform-choice-control">
+              <input
+                id="page-{{ page.page_id }}"
+                name="page_id"
+                type="radio"
+                value="{{ page.page_id }}"
+              >
+            </span>
+            <span class="platform-choice-copy">
+              <strong>{{ page.page_name }}</strong>
+              <span class="muted">Page ID: <code>{{ page.page_id }}</code></span>
+              {% if page.instagram_business_account_id %}
+              <span class="muted">Linked Instagram professional account: <code>{{ page.instagram_business_account_id }}</code></span>
+              {% endif %}
+            </span>
+          </label>
+          {% endfor %}
+        </div>
+      </fieldset>
+
+      <div class="button-row compact-button-row">
+        <button class="button-primary" type="submit">Connect selected Page</button>
+        <a class="button-secondary" href="{{ request.url_for('accounts') }}">Back to accounts</a>
+      </div>
+    </form>
+  </article>
+</section>
+{% endblock %}

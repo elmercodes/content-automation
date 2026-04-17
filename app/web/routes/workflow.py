@@ -135,7 +135,7 @@ async def submit_platform_selection(request: Request) -> Response:
             status_code=status.HTTP_400_BAD_REQUEST,
             **build_platform_selection_page_context(
                 non_field_errors=[
-                    "Save a master post before choosing configured platforms."
+                    "Save a master post before choosing connected platforms."
                 ]
             ),
         )
@@ -211,7 +211,7 @@ async def review_platforms(
             status_code=status.HTTP_400_BAD_REQUEST,
             review_errors=[
                 "Return to platform selection and choose at least one eligible "
-                "configured platform."
+                "connected platform."
             ],
         )
 
@@ -360,7 +360,7 @@ async def review_final(
             status_code=status.HTTP_400_BAD_REQUEST,
             final_review_errors=[
                 "Return to platform review after selecting at least one "
-                "configured platform."
+                "connected platform."
             ],
         )
 
@@ -419,7 +419,7 @@ async def review_final(
         }
         for platform, readiness_summary in zip(
             review_state.selected_platforms,
-            build_posting_readiness_summaries(review_state),
+            build_posting_readiness_summaries(db, review_state),
             strict=True,
         )
     )
@@ -459,7 +459,7 @@ async def submit_review_final(request: Request) -> Response:
             workflow_step="review_final",
             status_code=status.HTTP_400_BAD_REQUEST,
             final_review_errors=[
-                "Return to platform review after selecting at least one configured "
+                "Return to platform review after selecting at least one connected "
                 "platform."
             ],
         )
@@ -507,7 +507,7 @@ async def submit_review_final(request: Request) -> Response:
             selected_platform_slugs=result.selected_platform_slugs,
             platform_index=review_page.current_platform_index,
         )
-        posting_readiness = build_posting_readiness_summaries(review_state)
+        posting_readiness = build_posting_readiness_summaries(db, review_state)
         selected_platform_summaries = tuple(
             {
                 "platform": platform,

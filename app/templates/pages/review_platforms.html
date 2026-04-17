@@ -22,7 +22,7 @@
   {% if platform_selection_url %}
   <p>
     Return to <a href="{{ platform_selection_url }}">platform selection</a> and
-    choose at least one eligible configured platform.
+    choose at least one eligible connected platform.
   </p>
   {% endif %}
 </section>
@@ -284,7 +284,7 @@
   <h2>Review selected platforms after the platforms step</h2>
   <p>
     This preview step needs one saved master post plus at least one selected
-    configured platform. Start with
+    connected platform. Start with
     <a href="{{ request.url_for('compose') }}">Compose</a>, then continue
     through <a href="{{ request.url_for('platforms') }}">platform selection</a>.
   </p>

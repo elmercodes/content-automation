@@ -45,6 +45,8 @@ class PlatformOutcomeSummary:
     attempted_at: datetime
     posted_at: datetime | None
     external_post_id: str | None
+    account_display_name: str | None
+    account_identifier: str | None
     error_message: str | None
     response_summary: str | None
 
@@ -69,6 +71,8 @@ class PlatformAttemptSummary:
     attempted_at: datetime
     posted_at: datetime | None
     external_post_id: str | None
+    account_display_name: str | None
+    account_identifier: str | None
     error_message: str | None
     response_summary: str | None
 
@@ -365,6 +369,8 @@ def _build_platform_outcome_summary(log: PostPlatformLog) -> PlatformOutcomeSumm
         attempted_at=log.created_at,
         posted_at=log.posted_at,
         external_post_id=log.external_post_id,
+        account_display_name=log.account_display_name,
+        account_identifier=log.account_identifier,
         error_message=log.error_message,
         response_summary=log.response_summary,
     )
@@ -381,6 +387,8 @@ def _build_platform_attempt_summary(log: PostPlatformLog) -> PlatformAttemptSumm
         attempted_at=log.created_at,
         posted_at=log.posted_at,
         external_post_id=log.external_post_id,
+        account_display_name=log.account_display_name,
+        account_identifier=log.account_identifier,
         error_message=log.error_message,
         response_summary=log.response_summary,
     )

@@ -36,4 +36,5 @@ async def test_health_endpoint() -> None:
 
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
-    assert response.json()["configured_platforms"] == []
+    assert response.json()["app_configured_platforms"] == []
+    assert response.json()["connected_platforms"] == []

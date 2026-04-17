@@ -31,6 +31,7 @@ class PlatformPostingSpec:
     supports_image_carousel: bool
     max_image_items: int
     required_settings: tuple[str, ...] = ()
+    required_scopes: tuple[str, ...] = ()
     notes: str = ""
 
     def missing_settings(self, settings: Settings) -> tuple[str, ...]:
@@ -46,6 +47,7 @@ class PlatformDefinition:
     slug: str
     display_name: str
     required_settings: tuple[str, ...]
+    oauth_scopes: tuple[str, ...]
     supports_carousel: bool
     max_carousel_items: int
     allowed_media_types: tuple[str, ...]
@@ -70,7 +72,8 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
     PlatformDefinition(
         slug="instagram",
         display_name="Instagram",
-        required_settings=("instagram_access_token",),
+        required_settings=("instagram_client_id", "instagram_client_secret"),
+        oauth_scopes=("instagram_business_basic",),
         supports_carousel=True,
         max_carousel_items=10,
         allowed_media_types=("image",),
@@ -86,17 +89,21 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
             supports_image_carousel=False,
             max_image_items=0,
             notes=(
-                "Direct posting is deferred because the current local-only "
-                "workflow does not expose public media URLs for Meta publishing."
+                "Direct posting remains deferred because Meta content publishing "
+                "requires media to be hosted on a public server at publish time."
             ),
         ),
         caption_limit=2200,
-        validation_notes="Configured visibility is based on a local access token.",
+        validation_notes=(
+            "Requires an Instagram professional account connected through the "
+            "official Instagram login flow."
+        ),
     ),
     PlatformDefinition(
         slug="facebook",
         display_name="Facebook",
-        required_settings=("facebook_page_id",),
+        required_settings=("facebook_client_id", "facebook_client_secret"),
+        oauth_scopes=("pages_show_list",),
         supports_carousel=False,
         max_carousel_items=1,
         allowed_media_types=("image",),
@@ -114,13 +121,14 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
             notes="Direct Facebook posting is deferred in the current workflow.",
         ),
         validation_notes=(
-            "Configured visibility uses page ID presence as a lightweight check."
+            "Requires a Facebook login plus local selection of a managed Page."
         ),
     ),
     PlatformDefinition(
         slug="x",
         display_name="X",
-        required_settings=("x_api_key",),
+        required_settings=("x_client_id",),
+        oauth_scopes=("tweet.write", "media.write", "users.read", "offline.access"),
         supports_carousel=True,
         max_carousel_items=4,
         allowed_media_types=("image",),
@@ -135,19 +143,16 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
             supports_single_image=True,
             supports_image_carousel=True,
             max_image_items=4,
-            required_settings=(
-                "x_api_key",
-                "x_api_secret",
-                "x_access_token",
-                "x_access_token_secret",
-            ),
+            required_scopes=("tweet.write", "media.write", "users.read"),
             notes=(
-                "Posting uses local OAuth 1.0a user credentials plus local image "
-                "uploads to X."
+                "Posting uses stored OAuth 2.0 user tokens from a connected X "
+                "account."
             ),
         ),
         caption_limit=280,
-        validation_notes="Configured visibility is based on a local API key.",
+        validation_notes=(
+            "Requires an X account connected through OAuth 2.0 with PKCE."
+        ),
     ),
 )
 
@@ -183,6 +188,7 @@ def serialize_platform(
         "missing_settings": missing_settings,
         "configured": not missing_settings,
         "supports_carousel": platform.supports_carousel,
+        "oauth_scopes": platform.oauth_scopes,
         "max_carousel_items": platform.max_carousel_items,
         "allowed_media_types": platform.allowed_media_types,
         "carousel_allowed_media_types": platform.carousel_allowed_media_types,
@@ -199,6 +205,7 @@ def serialize_platform(
             "supports_image_carousel": (platform.posting_spec.supports_image_carousel),
             "max_image_items": platform.posting_spec.max_image_items,
             "required_settings": platform.posting_spec.required_settings,
+            "required_scopes": platform.posting_spec.required_scopes,
             "missing_settings": platform.posting_spec.missing_settings(settings),
             "notes": platform.posting_spec.notes,
         },

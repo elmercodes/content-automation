@@ -27,6 +27,30 @@ class PostingMediaItem:
 
 
 @dataclass(frozen=True, slots=True)
+class PostingConnectedAccount:
+    provider_slug: str
+    provider_account_id: str | None
+    display_name: str | None
+    username: str | None
+    access_token: str
+    refresh_token: str | None
+    token_type: str | None
+    scopes: tuple[str, ...]
+
+    @property
+    def account_label(self) -> str:
+        if self.display_name and self.username:
+            return f"{self.display_name} (@{self.username})"
+        if self.display_name:
+            return self.display_name
+        if self.username:
+            return f"@{self.username}"
+        if self.provider_account_id:
+            return self.provider_account_id
+        return "Connected account"
+
+
+@dataclass(frozen=True, slots=True)
 class PostingRequest:
     post_id: int
     platform_definition: PlatformDefinition
@@ -34,6 +58,9 @@ class PostingRequest:
     hashtags: str
     posting_text: str
     media_items: tuple[PostingMediaItem, ...]
+    connected_account: PostingConnectedAccount | None = None
+    account_status: str = "connected"
+    account_message: str = ""
 
     @property
     def platform_slug(self) -> str:

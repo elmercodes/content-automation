@@ -3,9 +3,9 @@
 {% block content %}
 <section class="page-intro">
   <p class="section-eyebrow">Platforms</p>
-  <h1>Select configured platforms</h1>
+  <h1>Select connected platforms</h1>
   <p>
-    Choose one or more configured platforms for the current master post. This
+    Choose one or more connected platforms for the current master post. This
     step stays server-rendered, uses the backend platform registry as the
     source of truth, and hands the workflow into platform review.
   </p>
@@ -88,27 +88,28 @@
   </article>
 </section>
 
-{% if not platform_selection_state.has_configured_platforms %}
+{% if not platform_selection_state.has_connected_platforms %}
 <section class="empty-state">
-  <h2>No platforms are configured locally</h2>
+  <h2>No connected platforms are available yet</h2>
   <p>
-    Add local credential values in <code>.env</code> using the names documented
-    in <code>.env.example</code>. The platform selection flow only exposes
-    configured platforms from the backend platform registry.
+    Add app-level provider settings in <code>.env</code> if needed, then
+    connect an account from <a href="{{ request.url_for('accounts') }}">Accounts</a>.
+    The platform selection flow only exposes providers that have an active
+    connected account stored locally.
   </p>
 </section>
 {% else %}
   {% if platform_selection_state.has_eligible_platforms %}
   <section class="card-grid">
     <article class="card form-card">
-      <h2>Choose configured platforms</h2>
+      <h2>Choose connected platforms</h2>
       <form class="platform-selection-form" method="post" action="{{ request.url_for('platforms') }}">
         <input type="hidden" name="post_id" value="{{ post_summary.id }}">
 
         <fieldset class="platform-fieldset">
           <legend>Selected platforms</legend>
           <p class="field-help">
-            Only configured platforms that pass this step's lightweight
+            Only connected platforms that pass this step's lightweight
             eligibility guardrails can move into platform review.
           </p>
 
@@ -160,12 +161,26 @@
   </section>
   {% else %}
   <section class="empty-state">
-    <h2>No configured platforms are eligible yet</h2>
+    <h2>No connected platforms are eligible yet</h2>
     <p>
-      The current master post is saved locally, but every configured platform is
+      The current master post is saved locally, but every connected platform is
       blocked by a workflow guardrail. Adjust the master post or add a
-      different locally configured platform, then try this step again.
+      different connected platform, then try this step again.
     </p>
+  </section>
+  {% endif %}
+
+  {% if unavailable_platforms %}
+  <section class="card-grid">
+    {% for platform in unavailable_platforms %}
+    <article class="card">
+      <h2>{{ platform.display_name }}</h2>
+      <p class="muted">{{ platform.message }}</p>
+      <div class="button-row compact-button-row">
+        <a class="button-secondary" href="{{ request.url_for('accounts') }}">Manage accounts</a>
+      </div>
+    </article>
+    {% endfor %}
   </section>
   {% endif %}
 
@@ -207,9 +222,9 @@
   </p>
 </section>
 
-{% if configured_platforms %}
+{% if supported_platforms %}
 <section class="card-grid">
-  {% for platform in configured_platforms %}
+  {% for platform in supported_platforms %}
   <article class="card">
     <h2>{{ platform.display_name }}</h2>
     <dl class="details compact-details">
@@ -238,11 +253,11 @@
 </section>
 {% else %}
 <section class="empty-state">
-  <h2>No platforms are configured locally</h2>
+  <h2>No platforms are supported yet</h2>
   <p>
-    Add local values in <code>.env</code> using the names shown in
-    <code>.env.example</code>. The page will only show platforms whose required
-    setting fields are present.
+    Add provider app settings in <code>.env</code>, then connect accounts from
+    <a href="{{ request.url_for('accounts') }}">Accounts</a>. The page will only
+    show providers with active connected accounts.
   </p>
 </section>
 {% endif %}
