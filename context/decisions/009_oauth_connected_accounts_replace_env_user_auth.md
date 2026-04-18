@@ -23,5 +23,6 @@ app configuration.
 - Platform selection and final-review readiness depend on connected-account
   state instead of env token presence.
 - X posting uses stored OAuth-derived tokens.
-- Instagram and Facebook can be connected for workflow availability even though
-  direct posting remains deferred.
+- Facebook posting uses a stored Page token for direct single-image submission.
+- Instagram can still be connected for workflow availability, but direct
+  posting remains deferred because Meta requires a publicly reachable media URL.

@@ -22,8 +22,9 @@ This file describes the current publishing sequence at a workflow level.
 - Final review can surface `not_connected` or `reauthorization_required` if an
   account changes state after selection.
 - X posts through stored connected-account tokens.
-- Instagram and Facebook remain explicit unsupported outcomes for direct
-  posting, even when connected.
+- Facebook posts one local image directly to the connected Page.
+- Instagram remains an explicit unsupported outcome because Meta content
+  publishing requires a publicly reachable media URL.
 
 ## Related Docs
 

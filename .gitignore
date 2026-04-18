@@ -11,6 +11,8 @@ htmlcov/
 
 storage/db/*
 !storage/db/.gitkeep
+storage/certs/*
+!storage/certs/.gitkeep
 storage/uploads/*
 !storage/uploads/.gitkeep
 storage/generated/*

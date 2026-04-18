@@ -4,7 +4,6 @@ from urllib.parse import urlencode
 
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
-from sqlalchemy.exc import OperationalError
 
 from app.compose_service import (
     build_compose_page_context,
@@ -618,38 +617,28 @@ async def results(request: Request, post_id: int | None = None) -> HTMLResponse:
 
 @router.get("/history", name="history", response_class=HTMLResponse)
 async def history(request: Request) -> HTMLResponse:
-    history_state = None
     session_factory = get_session_factory()
-    try:
-        with session_factory() as db:
-            history_state = load_history_index_state(db)
-    except OperationalError:
-        history_state = None
+    with session_factory() as db:
+        history_state = load_history_index_state(db)
 
-    history_posts = (
-        tuple(
-            {
-                "post": post,
-                "detail_url": str(
-                    request.url_for("history_post", post_id=post.post_id)
-                ),
-                "first_media_image_url": (
-                    str(
-                        request.url_for(
-                            "uploaded_media",
-                            upload_path=post.first_media_item.upload_relative_path,
-                        )
+    history_posts = tuple(
+        {
+            "post": post,
+            "detail_url": str(request.url_for("history_post", post_id=post.post_id)),
+            "first_media_image_url": (
+                str(
+                    request.url_for(
+                        "uploaded_media",
+                        upload_path=post.first_media_item.upload_relative_path,
                     )
-                    if post.first_media_item is not None
-                    and post.first_media_item.upload_relative_path is not None
-                    and not post.first_media_item.file_missing
-                    else None
-                ),
-            }
-            for post in history_state.posts
-        )
-        if history_state is not None
-        else ()
+                )
+                if post.first_media_item is not None
+                and post.first_media_item.upload_relative_path is not None
+                and not post.first_media_item.file_missing
+                else None
+            ),
+        }
+        for post in history_state.posts
     )
 
     return render_page(

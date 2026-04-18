@@ -6,8 +6,9 @@ Jinja2 renders HTML, SQLite stores durable records, and the filesystem under
 
 ## Current Baseline
 
-- `app/main.py` creates the FastAPI app and ensures local storage paths exist at
-  startup.
+- `app/main.py` creates the FastAPI app, ensures local storage paths exist at
+  startup, and upgrades the local SQLite schema to the latest Alembic revision
+  before serving requests.
 - `app/config.py` owns `.env` loading and repo-stable local path resolution.
 - `app/accounts_service.py` owns local connected-account persistence, OAuth
   state records, and provider runtime status evaluation.

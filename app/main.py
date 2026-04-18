@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -9,10 +10,12 @@ from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.config import get_settings
+from app.db import upgrade_database_to_head
 from app.web import router
 from app.web.templates import render_page
 
 APP_DIR = Path(__file__).resolve().parent
+logger = logging.getLogger("uvicorn.error")
 
 
 @asynccontextmanager
@@ -20,6 +23,7 @@ async def lifespan(_: FastAPI):
     settings = get_settings()
     for path in settings.local_storage_paths:
         path.mkdir(parents=True, exist_ok=True)
+    upgrade_database_to_head(settings)
     yield
 
 
@@ -49,6 +53,32 @@ def create_app() -> FastAPI:
             )
 
         return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
+
+    @app.exception_handler(Exception)
+    async def handle_unexpected_exception(
+        request: Request,
+        exc: Exception,
+    ) -> Response:
+        logger.exception(
+            "Unhandled application error while processing %s",
+            request.url.path,
+            exc_info=(type(exc), exc, exc.__traceback__),
+        )
+        if _should_render_html_error(request):
+            return render_page(
+                request,
+                "pages/error.html",
+                page_title="Request could not be completed",
+                active_page=_resolve_error_active_page(request),
+                status_code=500,
+                error_status_code=500,
+                error_title="Request could not be completed",
+                error_message="The app could not finish that request.",
+            )
+        return JSONResponse(
+            {"detail": "Internal Server Error"},
+            status_code=500,
+        )
 
     app.mount("/static", StaticFiles(directory=str(APP_DIR / "static")), name="static")
     app.include_router(router)

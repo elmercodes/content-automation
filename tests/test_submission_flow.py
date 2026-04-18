@@ -82,9 +82,30 @@ async def test_review_final_shows_posting_readiness_by_platform(
     assert response.status_code == 200
     assert "Posting readiness:" in response.text
     assert "Ready" in response.text
-    assert "Direct posting remains deferred because Meta content publishing" in (
-        response.text
-    )
+    assert "publicly reachable server" in response.text
+
+
+@pytest.mark.anyio
+async def test_review_final_marks_facebook_ready_for_single_image_submission(
+    isolated_local_runtime: Path,
+    configure_platform_env,
+) -> None:
+    configure_platform_env(facebook=True)
+
+    transport = ASGITransport(app=app)
+    async with AsyncClient(
+        transport=transport,
+        base_url="http://testserver",
+    ) as client:
+        post_id = await create_master_post(client, media_sizes=[(48, 36)])
+        response = await client.get(
+            f"/review/final?post_id={post_id}&platform_slug=facebook"
+        )
+
+    assert response.status_code == 200
+    assert "Facebook" in response.text
+    assert "Ready" in response.text
+    assert "synchronous local submission" in response.text
 
 
 @pytest.mark.anyio
@@ -253,7 +274,7 @@ async def test_submit_review_final_isolates_submission_failures_per_platform(
     def resolve_adapter(platform_slug: str):
         if platform_slug == "x":
             return FailingAdapter()
-        return UnsupportedPlatformAdapter(platform_slug)
+        return SuccessfulAdapter()
 
     monkeypatch.setattr(posting_service, "resolve_platform_adapter", resolve_adapter)
     settings = get_settings()
@@ -277,7 +298,7 @@ async def test_submit_review_final_isolates_submission_failures_per_platform(
 
     assert response.status_code == 303
     assert "Submission Failed" in results_response.text
-    assert "Unsupported" in results_response.text
+    assert "Posted" in results_response.text
 
     session_factory = get_session_factory(settings)
     with session_factory() as session:
@@ -286,4 +307,4 @@ async def test_submit_review_final_isolates_submission_failures_per_platform(
         ).all()
 
     assert [log.platform_slug for log in logs] == ["facebook", "x"]
-    assert [log.status for log in logs] == ["unsupported", "submission_failed"]
+    assert [log.status for log in logs] == ["posted", "submission_failed"]

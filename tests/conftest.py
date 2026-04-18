@@ -3,17 +3,24 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-from alembic.config import Config
 
 from alembic import command
 from app.accounts_service import upsert_connected_account
-from app.config import PROJECT_ROOT, get_settings
-from app.db import ConnectedAccount, clear_db_runtime_caches, get_session_factory
+from app.config import Settings, get_settings
+from app.db import (
+    ConnectedAccount,
+    build_alembic_config,
+    clear_db_runtime_caches,
+    get_session_factory,
+)
 from app.oauth_clients import OAuthConnectedAccountPayload
 
 
 @pytest.fixture
-def isolated_local_runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+def isolated_runtime_settings(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> Settings:
     storage_root = tmp_path / "storage"
     uploads_dir = storage_root / "uploads"
     generated_dir = storage_root / "generated"
@@ -23,27 +30,29 @@ def isolated_local_runtime(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> P
     monkeypatch.setenv("UPLOADS_DIR", str(uploads_dir))
     monkeypatch.setenv("GENERATED_DIR", str(generated_dir))
     monkeypatch.setenv("DATABASE_URL", f"sqlite:///{database_path}")
-    monkeypatch.delenv("INSTAGRAM_CLIENT_ID", raising=False)
-    monkeypatch.delenv("INSTAGRAM_CLIENT_SECRET", raising=False)
-    monkeypatch.delenv("FACEBOOK_CLIENT_ID", raising=False)
-    monkeypatch.delenv("FACEBOOK_CLIENT_SECRET", raising=False)
-    monkeypatch.delenv("X_CLIENT_ID", raising=False)
+    monkeypatch.setenv("INSTAGRAM_CLIENT_ID", "")
+    monkeypatch.setenv("INSTAGRAM_CLIENT_SECRET", "")
+    monkeypatch.setenv("FACEBOOK_CLIENT_ID", "")
+    monkeypatch.setenv("FACEBOOK_CLIENT_SECRET", "")
+    monkeypatch.setenv("X_CLIENT_ID", "")
 
     get_settings.cache_clear()
     clear_db_runtime_caches()
-    settings = get_settings()
+    yield get_settings()
+
+    get_settings.cache_clear()
+    clear_db_runtime_caches()
+
+
+@pytest.fixture
+def isolated_local_runtime(isolated_runtime_settings: Settings) -> Path:
+    settings = isolated_runtime_settings
     for path in settings.local_storage_paths:
         path.mkdir(parents=True, exist_ok=True)
 
-    config = Config(str(PROJECT_ROOT / "alembic.ini"))
-    config.attributes["database_url"] = settings.database_url
-    config.set_main_option("script_location", str(PROJECT_ROOT / "alembic"))
-    command.upgrade(config, "head")
+    command.upgrade(build_alembic_config(settings), "head")
 
-    yield storage_root
-
-    get_settings.cache_clear()
-    clear_db_runtime_caches()
+    return settings.storage_root_path
 
 
 @pytest.fixture
@@ -59,20 +68,20 @@ def configure_platform_env(monkeypatch: pytest.MonkeyPatch):
             monkeypatch.setenv("INSTAGRAM_CLIENT_ID", "test-instagram-client")
             monkeypatch.setenv("INSTAGRAM_CLIENT_SECRET", "test-instagram-secret")
         else:
-            monkeypatch.delenv("INSTAGRAM_CLIENT_ID", raising=False)
-            monkeypatch.delenv("INSTAGRAM_CLIENT_SECRET", raising=False)
+            monkeypatch.setenv("INSTAGRAM_CLIENT_ID", "")
+            monkeypatch.setenv("INSTAGRAM_CLIENT_SECRET", "")
 
         if facebook:
             monkeypatch.setenv("FACEBOOK_CLIENT_ID", "test-facebook-client")
             monkeypatch.setenv("FACEBOOK_CLIENT_SECRET", "test-facebook-secret")
         else:
-            monkeypatch.delenv("FACEBOOK_CLIENT_ID", raising=False)
-            monkeypatch.delenv("FACEBOOK_CLIENT_SECRET", raising=False)
+            monkeypatch.setenv("FACEBOOK_CLIENT_ID", "")
+            monkeypatch.setenv("FACEBOOK_CLIENT_SECRET", "")
 
         if x or x_posting:
             monkeypatch.setenv("X_CLIENT_ID", "test-x-client")
         else:
-            monkeypatch.delenv("X_CLIENT_ID", raising=False)
+            monkeypatch.setenv("X_CLIENT_ID", "")
 
         get_settings.cache_clear()
         clear_db_runtime_caches()
@@ -113,7 +122,7 @@ def configure_platform_env(monkeypatch: pytest.MonkeyPatch):
                         access_token="facebook-page-access-token",
                         refresh_token=None,
                         token_type="Bearer",
-                        scopes=("pages_show_list",),
+                        scopes=("pages_show_list", "pages_manage_posts"),
                         expires_at=None,
                         refresh_expires_at=None,
                         provider_metadata={},

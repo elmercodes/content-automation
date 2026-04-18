@@ -25,6 +25,16 @@ posting capabilities.
 - `ready to post`: connected, required posting scopes are present, and direct
   posting is enabled in code
 
+## Current Posting Capabilities
+
+- `x`: direct posting is enabled for single images and image carousels up to 4
+  items.
+- `facebook`: direct posting is enabled for one local image per submission and
+  requires the `pages_manage_posts` scope on the connected Page token.
+- `instagram`: direct posting remains disabled because Meta content publishing
+  requires publicly reachable media URLs, which the local-only workflow does
+  not provide.
+
 ## Boundaries
 
 - The registry is static metadata only.

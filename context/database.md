@@ -34,6 +34,8 @@ account state.
 - SQLite remains the only supported database engine.
 - SQLAlchemy sessions are synchronous and backend-owned.
 - Schema changes go through Alembic revisions only.
+- App startup upgrades the configured local SQLite database to the latest
+  Alembic revision before serving requests.
 
 ## Related Docs
 

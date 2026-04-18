@@ -9,7 +9,6 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from sqlalchemy import select
-from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session
 
 from app.config import Settings, get_settings
@@ -209,14 +208,9 @@ def load_connected_account(
     settings: Settings | None = None,
     ensure_active: bool = False,
 ) -> ConnectedAccount | None:
-    try:
-        account = session.scalar(
-            select(ConnectedAccount).where(
-                ConnectedAccount.provider_slug == provider_slug
-            )
-        )
-    except OperationalError:
-        return None
+    account = session.scalar(
+        select(ConnectedAccount).where(ConnectedAccount.provider_slug == provider_slug)
+    )
     if account is None:
         return None
     if ensure_active:
@@ -288,14 +282,9 @@ def disconnect_connected_account(
     *,
     provider_slug: str,
 ) -> ConnectedAccount | None:
-    try:
-        account = session.scalar(
-            select(ConnectedAccount).where(
-                ConnectedAccount.provider_slug == provider_slug
-            )
-        )
-    except OperationalError:
-        return None
+    account = session.scalar(
+        select(ConnectedAccount).where(ConnectedAccount.provider_slug == provider_slug)
+    )
     if account is None:
         return None
 
@@ -418,7 +407,7 @@ def load_oauth_connection_attempt(
     attempt = session.scalar(statement)
     if attempt is None:
         return None
-    if attempt.expires_at <= _utcnow():
+    if _normalize_datetime(attempt.expires_at) <= _utcnow():
         session.delete(attempt)
         session.commit()
         return None
@@ -481,7 +470,7 @@ def _missing_posting_scopes(
 
 
 def _token_is_expired(expires_at: datetime | None) -> bool:
-    return expires_at is not None and expires_at <= _utcnow()
+    return expires_at is not None and _normalize_datetime(expires_at) <= _utcnow()
 
 
 def _split_scopes(value: str) -> tuple[str, ...]:
@@ -502,3 +491,9 @@ def _load_json_value(value: str | None) -> dict[str, Any]:
 
 def _utcnow() -> datetime:
     return datetime.now(UTC)
+
+
+def _normalize_datetime(value: datetime) -> datetime:
+    if value.tzinfo is None:
+        return value.replace(tzinfo=UTC)
+    return value.astimezone(UTC)

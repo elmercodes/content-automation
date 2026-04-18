@@ -10,8 +10,8 @@ supported, and keep a lightweight local history without a JavaScript frontend.
 
 | Platform | App config in `.env` | Account connection | Direct posting | Notes |
 | --- | --- | --- | --- | --- |
-| Instagram | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Yes | No | Professional-account connection is supported. Preview/review stays available after connect, but direct posting is still deferred because Meta publishing requires public media URLs. |
-| Facebook | `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET` | Yes | No | Login plus managed Page selection is supported. Preview/review stays available after connect, but direct posting is still deferred. |
+| Instagram | `INSTAGRAM_CLIENT_ID`, `INSTAGRAM_CLIENT_SECRET` | Yes | No | Professional-account connection is supported. Preview/review stays available after connect, but direct posting still needs public media URLs that the current local-only workflow does not provide. |
+| Facebook | `FACEBOOK_CLIENT_ID`, `FACEBOOK_CLIENT_SECRET` | Yes | Yes | Login plus managed Page selection is supported. Single-image posts upload directly to the connected Facebook Page with the stored local Page token. |
 | X | `X_CLIENT_ID` | Yes | Yes | Uses OAuth 2.0 with PKCE for account connection, stores tokens locally in SQLite, and posts through the stored connected-account tokens. |
 
 ## Requirements
@@ -28,11 +28,14 @@ source .venv/bin/activate
 python -m pip install --upgrade pip
 python -m pip install -e .[dev]
 cp .env.example .env
-.venv/bin/alembic upgrade head
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
+./scripts/generate_localhost_https_cert.sh
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --ssl-keyfile storage/certs/localhost-key.pem --ssl-certfile storage/certs/localhost-cert.pem
 ```
 
-Open `http://127.0.0.1:8000/`.
+Open `https://localhost:8000/`.
+
+App startup creates missing local directories and auto-applies pending Alembic
+migrations for the configured SQLite database.
 
 ## `.env` setup notes
 
@@ -42,6 +45,27 @@ Open `http://127.0.0.1:8000/`.
   `.env`.
 - Restart the app after editing `.env` because settings are cached in-process.
 - Only local SQLite database URLs are supported.
+- For Facebook and Instagram OAuth, `APP_BASE_URL` should be an HTTPS URL that
+  matches the browser origin and the provider dashboard callback entry.
+
+## Local HTTPS for Meta OAuth
+
+Facebook and Instagram OAuth will reject the default insecure local callback
+origin. This repo includes a small helper for a local self-signed certificate:
+
+```bash
+./scripts/generate_localhost_https_cert.sh
+uvicorn app.main:app --reload --host 0.0.0.0 --port 8000 --ssl-keyfile storage/certs/localhost-key.pem --ssl-certfile storage/certs/localhost-cert.pem
+```
+
+Use `https://localhost:8000` as the browser URL and set this exact callback URL
+in the Meta developer dashboard:
+
+- `https://localhost:8000/oauth/callback/facebook`
+- `https://localhost:8000/oauth/callback/instagram`
+
+The certificate is self-signed, so the browser may ask you to accept a local
+warning once.
 
 ## First local run
 
@@ -54,6 +78,9 @@ Open `http://127.0.0.1:8000/`.
 5. Submit from `Final review` where direct posting is supported.
 6. Inspect the immediate `Results` page, then browse the longer-lived `History`
    ledger.
+
+For Facebook direct posting, reconnect the Page once if it was connected before
+`pages_manage_posts` was added to the requested OAuth scopes.
 
 ## Local data layout
 
@@ -72,12 +99,14 @@ storage/
 - `storage/db/` holds the SQLite database, including connected-account tokens.
 - `storage/uploads/` holds original uploaded media.
 - `storage/generated/` holds regenerable preview artifacts.
-- App startup creates missing directories.
-- Alembic migrations create and upgrade the database schema.
+- App startup creates missing directories and upgrades the local schema to the
+  latest Alembic revision.
 
 ## Database and migrations
 
-Run the current schema on a clean checkout with:
+App startup automatically upgrades the configured SQLite database to the latest
+schema. You can still run migrations manually for recovery, CI, or explicit
+local setup:
 
 ```bash
 .venv/bin/alembic upgrade head
@@ -101,7 +130,9 @@ pytest
   - Connect or reconnect the provider account, then return to the workflow.
 - X is connected but not ready to submit:
   - Reconnect X and grant the requested OAuth scopes.
-- A fresh checkout shows missing tables:
+- Facebook is connected but not ready to submit:
+  - Reconnect Facebook and grant `pages_manage_posts`.
+- Startup fails because the local schema could not be upgraded:
   - Run `.venv/bin/alembic upgrade head`.
 - Uploaded media or previews are missing:
   - Check the local `storage/uploads/` and `storage/generated/` directories.

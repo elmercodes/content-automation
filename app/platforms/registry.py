@@ -89,8 +89,9 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
             supports_image_carousel=False,
             max_image_items=0,
             notes=(
-                "Direct posting remains deferred because Meta content publishing "
-                "requires media to be hosted on a public server at publish time."
+                "Instagram content publishing requires media to be hosted on a "
+                "publicly reachable server at publish time, which the current "
+                "local-only workflow does not provide."
             ),
         ),
         caption_limit=2200,
@@ -103,7 +104,7 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
         slug="facebook",
         display_name="Facebook",
         required_settings=("facebook_client_id", "facebook_client_secret"),
-        oauth_scopes=("pages_show_list",),
+        oauth_scopes=("pages_show_list", "pages_manage_posts"),
         supports_carousel=False,
         max_carousel_items=1,
         allowed_media_types=("image",),
@@ -114,11 +115,15 @@ PLATFORM_REGISTRY: tuple[PlatformDefinition, ...] = (
             frame_label="Square feed preview",
         ),
         posting_spec=PlatformPostingSpec(
-            enabled=False,
-            supports_single_image=False,
+            enabled=True,
+            supports_single_image=True,
             supports_image_carousel=False,
-            max_image_items=0,
-            notes="Direct Facebook posting is deferred in the current workflow.",
+            max_image_items=1,
+            required_scopes=("pages_manage_posts",),
+            notes=(
+                "Posting uploads one local image directly to the connected "
+                "Facebook Page."
+            ),
         ),
         validation_notes=(
             "Requires a Facebook login plus local selection of a managed Page."

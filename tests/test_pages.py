@@ -1,7 +1,6 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from app.config import get_settings
 from app.main import app
 
 
@@ -18,8 +17,11 @@ from app.main import app
         ("/history", "Local content ledger"),
     ],
 )
-async def test_workflow_pages_render(path: str, expected_text: str) -> None:
-    get_settings.cache_clear()
+async def test_workflow_pages_render(
+    path: str,
+    expected_text: str,
+    isolated_local_runtime,
+) -> None:
     async with app.router.lifespan_context(app):
         transport = ASGITransport(app=app)
         async with AsyncClient(
@@ -33,8 +35,9 @@ async def test_workflow_pages_render(path: str, expected_text: str) -> None:
 
 
 @pytest.mark.anyio
-async def test_unknown_page_renders_html_not_found_state() -> None:
-    get_settings.cache_clear()
+async def test_unknown_page_renders_html_not_found_state(
+    isolated_local_runtime,
+) -> None:
     async with app.router.lifespan_context(app):
         transport = ASGITransport(app=app)
         async with AsyncClient(

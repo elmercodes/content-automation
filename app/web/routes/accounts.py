@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import logging
+
 from fastapi import APIRouter, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
@@ -27,6 +29,7 @@ from app.platforms import get_platform
 from app.web.templates import render_page
 
 router = APIRouter()
+logger = logging.getLogger("uvicorn.error")
 
 
 @router.get("/accounts", name="accounts", response_class=HTMLResponse)
@@ -155,10 +158,18 @@ async def oauth_callback(
 
         if provider == "facebook":
             authorization = exchanged
-            page_options = oauth_client.load_page_options(
-                settings=settings,
-                authorization=authorization,
-            )
+            try:
+                page_options = oauth_client.load_page_options(
+                    settings=settings,
+                    authorization=authorization,
+                )
+            except OAuthProviderError as exc:
+                logger.warning(
+                    "Facebook page lookup failed during OAuth callback: %s",
+                    exc,
+                )
+                delete_oauth_connection_attempt(db, attempt)
+                return _redirect_accounts(request, error=str(exc))
             if not page_options:
                 delete_oauth_connection_attempt(db, attempt)
                 return _redirect_accounts(

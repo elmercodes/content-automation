@@ -143,6 +143,11 @@ class UnsupportedPlatformAdapter:
 
 
 def resolve_platform_adapter(platform_slug: str) -> PlatformAdapter:
+    if platform_slug == "facebook":
+        from app.platforms.facebook_adapter import FacebookAdapter
+
+        return FacebookAdapter()
+
     if platform_slug == "x":
         from app.platforms.x_adapter import XAdapter
 

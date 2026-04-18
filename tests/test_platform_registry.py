@@ -61,6 +61,8 @@ def test_platform_registry_exposes_image_only_carousel_rules_for_current_workflo
     assert facebook.allowed_media_types == ("image",)
     assert facebook.carousel_allowed_media_types == ()
     assert instagram.posting_spec.enabled is False
+    assert facebook.posting_spec.enabled is True
+    assert facebook.posting_spec.required_scopes == ("pages_manage_posts",)
     assert x_platform.posting_spec.enabled is True
     assert x_platform.posting_spec.required_settings == ()
     assert x_platform.posting_spec.required_scopes == (

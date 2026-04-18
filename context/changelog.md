@@ -2,6 +2,21 @@
 
 Notable repository changes are listed here in a short human-readable form.
 
+## 2026-04-18
+
+- Added startup-time Alembic upgrades so the local SQLite schema is brought to
+  `head` before requests are served.
+- Removed the remaining missing-schema fallbacks that could hide broken local
+  database state behind empty provider or history views.
+- Added regression coverage for upgrading pre-OAuth databases at startup and
+  for the OAuth connect route against an older local schema.
+- Added a local HTTPS certificate helper and updated the default dev startup
+  instructions to use `https://localhost:8000` for Meta OAuth callbacks.
+- Added a real Facebook Page posting adapter for local single-image posts,
+  updated Facebook OAuth scope requirements to include `pages_manage_posts`,
+  and documented the remaining Instagram publishing constraint around public
+  media URLs.
+
 ## 2026-04-17
 
 - Replaced env-driven provider user auth with OAuth-based connected accounts,

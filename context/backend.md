@@ -16,6 +16,8 @@ local-only.
   workflow instead of env-visible platforms.
 - `app/posting_service.py` builds posting requests from saved master posts plus
   stored connected-account tokens.
+- `app/platforms/facebook_adapter.py` posts one local image directly to the
+  connected Facebook Page.
 - `app/platforms/x_adapter.py` posts using OAuth-derived tokens from SQLite, not
   env credentials.
 - `app/web/routes/accounts.py` owns the server-rendered account connection
